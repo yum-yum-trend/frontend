@@ -1,0 +1,18 @@
+* {
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+.nav-wrap {
+    width: 1000px;
+    margin: auto;
+}
+
+.list-wrap {
+    width: 1000px;
+    margin: 50px auto 50px auto;
+}
+
+.sign-wrap {
+    width: 1000px;
+    margin: 50px auto 50px auto;
+}
