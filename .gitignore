@@ -1,3 +1,6 @@
 ### IntelliJ ###
 .idea
 
+### Frontend secret resource ###
+secret
+
