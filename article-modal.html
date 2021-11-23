@@ -1,0 +1,67 @@
+<!-- 게시물 등록 / 상세보기 모달 -->
+<div class="modal fade" id="article-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="display: flex">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-left">
+                    <div class="modal-left-image-area">
+                        <div id="image-list" class="modal-dynamic-contents"></div>
+
+                    </div>
+                    <div class="modal-left-btn-area">
+                        <div class="form-group" id="article-image-form">
+                            <input class="form-control form-control-user modal-dynamic-contents" type="file" multiple="multiple"
+                                   name="article-images" id="article-images">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-right">
+                    <div>
+                        <img id="article-user-profile-img" src="/images/profile_placeholder.png" alt="profile image" style="border-radius: 50%">
+                        <span id="article-username">사용자 이름</span>
+                    </div>
+                    <div>
+                        <textarea id="article-textarea" class="modal-dynamic-contents" placeholder="내용을 입력해주세요."></textarea> <!-- 게시글 등록 -->
+                        <div id="article-text-div" class="modal-dynamic-contents" style="display: none;"></div> <!-- 게시글 상세보기 -->
+                    </div>
+                    <div>
+                        <i class="fa fa-map-marker article-content-icon" aria-hidden="true"></i> 위치
+                        <div class="input-group mb-3" id="article-location-input-div">
+                            <input type="text" class="form-control" placeholder="지도" onclick="지도API()">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                        <div id="article-location-div"> <!-- <div id="article-location-div" class="modal-dynamic-contents"> -->
+                            <!-- 지도에서 선택한 위치 출력 -->
+                            <span id="article-location-span">서울특별시 마포구 동교로9길 28</span>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fa fa-hashtag article-content-icon" aria-hidden="true"></i> 해시태그
+                        <div class="input-group mb-3" id="article-hashtag-input-div">
+                            <input type="text" id="hashtag-input" class="form-control" placeholder="해시태그">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                            </div>
+                        </div>
+                        <div id="hashtag-list" class="modal-dynamic-contents">
+                            <!-- 입력한 해시태그 출력 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button기 id="add-article-btn" type="button" class="btn btn-primary" onclick="addArticle()">게시하기</button기>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    registerEventListener();
+</script>
