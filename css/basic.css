@@ -126,3 +126,15 @@
     left: 40%;
     text-align: center;
 }
+
+.location-list-font-size {
+    font-size: 14px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pagination-size {
+    height: 15px;
+}

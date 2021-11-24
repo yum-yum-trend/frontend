@@ -221,3 +221,4 @@ function makeArticleContents(article) {
         $('#hashtag-list').append(tmpSpan)
     })
 }
+
