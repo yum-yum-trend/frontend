@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <meta charset="UTF-8">
+
+    <!-- Custom JS / CSS -->
+    <script src="/secret/keys.js"></script>
+    <script src="/secret/hosts.js"></script>
+    <link href="/css/basic.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+
+    <title>Yum Yum Trend</title>
+</head>
+<script>
+    /* 애플리케이션 로그인 */
+    function login() {
+        let info = {
+            username: $("#username").val(),
+            password: $("#password").val()
+        }
+        $.ajax({
+            type: 'POST',
+            url: `${LOCALHOST}/login`,
+            contentType: "application/json",
+            data: JSON.stringify(info),
+            success: function (response) {
+                localStorage.setItem("token", response['token']);
+                localStorage.setItem("username", response['username']);
+                location.href = 'index.html';
+            }
+        })
+    }
+
+    /* 카카오 로그인 */
+    Kakao.init(KAKAO_JAVASCRIPT_KEY);
+    function loginWithKakao() {
+        Kakao.Auth.login({
+            success: function (authObj) {
+                $.ajax({
+                    type: 'POST',
+                    url: `${LOCALHOST}/login/kakao`,
+                    contentType: "application/json",
+                    data: JSON.stringify({'token': authObj['access_token']}),
+                    success: function (response) {
+                        localStorage.setItem("token", response['token']);
+                        localStorage.setItem("username", response['username']);
+                        location.href = 'index.html';
+                    }
+                })
+            },
+            fail: function (err) {
+                alert(JSON.stringify(err))
+            },
+        })
+    }
+</script>
+<body>
+<div class="sign-wrap">
+    <div class="col-md-5 mx-auto">
+        <div class="logo mb-3">
+            <div class="col-md-12 text-center">
+                <h1>로그인</h1>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="username">사용자 이름</label>
+            <input type="text" name="username" class="form-control" id="username"
+                   placeholder="사용자이름을 입력해주세요.">
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" name="password" id="password" class="form-control"
+                   placeholder="비밀번호를 입력해주세요.">
+        </div>
+        <div class="col-md-12 text-center">
+            <p>
+                <button type="submit" class=" btn btn-block btn-primary tx-tfm" onclick="login()">로그인</button>
+            </p>
+        </div>
+        <div class="col-md-12 mb-3 text-center ">
+            </p>
+            <button type="submit" class=" btn btn-block btn-warning tx-tfm" onclick="loginWithKakao()">카카오 로그인</button>
+            </p>
+        </div>
+        <div class="form-group">
+            <p class="text-center">아직 회원이 아니신가요? <a href="signup.html" id="signup">회원가입</a></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
