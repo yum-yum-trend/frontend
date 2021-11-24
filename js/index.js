@@ -1,3 +1,5 @@
+const MAX_IMAGE_UPLOAD = 10;
+
 let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
@@ -36,8 +38,8 @@ function registerEventListener() {
     // 이미지 파일 입력 리스너
     $('#article-images').on('change', function (e) {
         // 업로드 된 파일 유효성 체크
-        if (Object.keys(imageFileDict).length == 10) {
-            alert("이미지는 최대 10개까지 업로드 가능합니다.");
+        if (Object.keys(imageFileDict).length == MAX_IMAGE_UPLOAD) {
+            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
             return;
         }
 
@@ -133,7 +135,7 @@ function addArticle() {
         type: 'POST',
         url: `${LOCALHOST}/articles`,
         cache: false,
-        contentType: false,
+        contentType: 'multipart/form-data',
         processData: false,
         data: formData,
         success: function (response) {
