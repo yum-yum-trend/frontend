@@ -38,7 +38,6 @@ function registerEventListener() {
         // 업로드 된 파일 유효성 체크
         if (Object.keys(imageFileDict).length == 10) {
             alert("이미지는 최대 10개까지 업로드 가능합니다.");
-            e.target.files.pop();
             return;
         }
 
