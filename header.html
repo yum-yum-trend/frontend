@@ -1,14 +1,36 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="nav-wrap">
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" href="#">Tag</a>
-                <a class="nav-item nav-link" href="#">Location</a>
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                <button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Add</button>
-                <a class="nav-item nav-link" href="#">Profile</a>
+        <div class="row navbar-nav">
+            <div class="col-2 align-self-center">
+                <a class="nav-item nav-link active" href="#">홈 <span class="sr-only">(current)</span></a>
+            </div>
+            <div class="col-8 align-self-center">
+                <div class="row justify-content-md-center">
+                    <div class="col-1">
+                        <a class="nav-item nav-link" href="#">태그</a>
+                    </div>
+                    <div class="col-1">
+                        <a class="nav-item nav-link" href="#">위치</a>
+                    </div>
+                    <div class="col-4">
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2 align-self-center">
+                <div class="row">
+                    <div class="col align-self-center">
+                        <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" onclick="articleModalToggle('add')">게시글 추가</button>
+                    </div>
+                    <div class="col align-self-center">
+                        <div class="nav-item nav-link" href="#">
+                            <img id="nav-user-profile-image" src="/images/profile_placeholder.png" alt="profile image" style="border-radius: 50%" width="50px" height="50px">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
