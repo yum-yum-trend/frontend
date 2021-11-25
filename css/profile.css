@@ -1,0 +1,81 @@
+* {
+    font-family: 'Do Hyeon', sans-serif;
+}
+
+.nav-wrap {
+    width: 1000px;
+    margin: auto;
+}
+
+.nav-link {
+    color: rgba(0,0,0,.5);
+}
+
+.nav-link.active{
+    color: rgba(0,0,0,.9);
+}
+
+.nav-link:hover {
+    color: rgba(0,0,0,.7);
+}
+
+.profile-content {
+    height: 225px;
+    width: 1000px;
+    margin: auto;
+    display: flex;
+}
+
+.profile-hr {
+    width: 1000px;
+}
+
+.profile-pic{
+    width: 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#user-profile-image{
+    border-radius: 50%;
+    width :150px;
+    height : 150px;
+}
+
+.for-cursor {
+    cursor: pointer;
+}
+
+.profile-info{
+    width: 65%;
+}
+
+#profile-username{
+    position: absolute;
+    margin : 50px auto auto auto;
+    font-size: xx-large;
+}
+
+#setting-button{
+    position: absolute;
+    margin : 50px auto auto 250px;
+}
+
+#profile-introduction{
+    position: absolute;
+    margin : 130px auto auto auto;
+    font-size: large;
+}
+
+.content-articles {
+    width: 1000px;
+    margin:auto;
+    display: block;
+}
+
+.content-comments {
+    width: 1000px;
+    margin:auto;
+    display: block;
+}

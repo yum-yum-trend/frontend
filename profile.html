@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/images/favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+
+    <!-- Custom JS / CSS -->
+    <script src="/secret/secrets.js"></script>
+    <script src="/js/basic.js"></script>
+    <link href="/css/profile.css" rel="stylesheet" type="text/css">
+    <title>Yum Yum Trend</title>
+</head>
+<script>
+    const gUserId = localStorage.getItem('userId')
+    const gProfileUserId = location.href.split("/")[-1]
+    const gIsMypage = (gUserId == gProfileUserId) ? true : true;
+
+
+    $(document).ready(function () {
+        showMypageSettings(gUserId)
+        $("#content-articles").hide();
+        $("#content-comments").hide();
+        showUserProfileInfo(gUserId)
+        showUserArticles(gUserId)
+    })
+
+    // 유저에 따른 프로필 이미지 변경 & 설정 버튼 활성화 여부
+    function showMypageSettings(userId) {
+        if (gIsMypage) {
+            let profilePictureButtonActive = `<img id="user-profile-image" class="for-cursor" title="프로필 사진 추가" src="" alt="profile image">
+                                                <input class="form-control" type="file" accept="img/*" id="imageFile" name="imageFile" style="display:none;">`
+            $('#profile-pic').append(profilePictureButtonActive)
+            let settingButtonActive = `<button id="setting-button" class="btn btn-outline-secondary">설정</button>`
+            $('#setting-button-div').append(settingButtonActive)
+        } else {
+            let profilePictureButtonInactive = `<img id="user-profile-image" src="" alt="profile image">`
+            $('#profile-pic').append(profilePictureButtonInactive)
+        }
+    }
+
+    $(function() {
+        $('#user-profile-image').click(function () {
+            $("input[name='imageFile']").click();
+        })
+
+        $('#imageFile').on('change', function (e) {
+            e.preventDefault();
+            var newProfileImage = e.target.files[0];
+
+            updateUserProfileImage(newProfileImage);
+        })
+    })
+    function updateUserProfileImage(newProfileImage) {
+        var formData = new FormData();
+        formData.append("newProfileImage", newProfileImage);
+
+        $.ajax({
+            type: "POST",
+            url: `${LOCALHOST}/profile/imagechange/${gUserId}`,
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: function () {
+                location.reload();
+            },
+            error: function (request, status, error) {
+                alert("code:" + request.status + "\n" + "error:" + error);
+            }
+        })
+    }
+
+
+    // 프로필 기본 정보 불러오기 (username, intro, 사진)
+    function showUserProfileInfo(userId) {
+        $.ajax({
+            type : "GET",
+            url : `${LOCALHOST}/profile/${userId}`,
+            data : {},
+            success : function (response) {
+                if (response.username){
+                    $('#profile-username').text(response.username);
+                } else {
+                    $('#profile-username').text(response.kakaoId);
+                }
+
+                if (response.userProfileIntro) {
+                    $('#profile-introduction').text(response.userProfileIntro);
+                } else {
+                    $('#profile-introduction').text("자기소개를 작성해보세요.");
+                }
+
+                if (response.userProfileImageUrl) {
+                    $("#nav-user-profile-image").attr("src", response.userProfileImageUrl);
+                    $("#user-profile-image").attr("src", response.userProfileImageUrl);
+                } else {
+                    $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+                    $("#user-profile-image").attr("src", "/images/profile_placeholder.png");
+                }
+            }
+        })
+    }
+
+    // 프로필 사진 변경하기
+    function changeImage(userId) {
+
+        console.log(userId)
+
+    }
+
+    // 자신이 작성한 글 보기
+    function showUserArticles(userId) {
+        $("#content-articles").empty();
+        $("#articles-division").addClass("active");
+        $("#comments-division").removeClass("active");
+        $("#content-articles").show();
+        $("#content-comments").hide();
+
+        $.ajax({
+            type : "GET",
+            url : `${LOCALHOST}/profile/articles/${userId}`,
+            data : {},
+            success : function (response) {
+                console.log(response);
+                makeArticles(response);
+            }
+        })
+    }
+
+    function makeArticles(articles) {
+        articles.forEach(function (article) {
+            let tmpHtml = ` <div class="col-3">
+                            <div class="card" onclick="getArticle(${article.id})" style="display: inline-block;">
+                                <img class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
+                                <div class="card-body">
+                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 / 좋아요 수 / 댓글 수</p>
+                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+            $('#content-articles').append(tmpHtml);
+        })
+    }
+
+    // 자신이 작성한 코멘트 보기
+    function showUserComments(userId) {
+        $("#content-comments").empty();
+        $("#comments-division").addClass("active");
+        $("#articles-division").removeClass("active");
+        $("#content-comments").show();
+        $("#content-articles").hide();
+
+        $.ajax({
+            type : "GET",
+            url : `${LOCALHOST}/profile/comments/${userId}`,
+            data : {},
+            success : function (response) {
+
+            }
+        })
+    }
+</script>
+
+<body>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="nav-wrap">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">홈</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ml-2" href="#">태그</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ml-2" href="#">위치</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ml-2" href="#">글쓰기</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link ml-2" href="#">프로필<span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="검색어를 입력해주세요" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- profile userinfo division -->
+<div class="profile-content">
+    <div class="profile-pic" id="profile-pic">
+    </div>
+    <div class="profile-info">
+        <div id="profile-username"></div>
+        <div id="setting-button-div"></div>
+        <div id="profile-introduction"></div>
+    </div>
+</div>
+<hr class="profile-hr">
+
+<!-- profile content button division -->
+<div class="profile-content justify-content-center">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" id="articles-division" onclick="showUserArticles(localStorage.getItem('userId'))" href="#">Articles</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="comments-division" onclick="showUserComments(localStorage.getItem('userId'))"  href="#">Comments</a>
+        </li>
+    </ul>
+</div>
+
+<!-- profile content division -->
+<div class="profile-content">
+    <div class="row card-deck" id="content-articles">
+    </div>
+    <div class="row card-deck" id="content-comments">
+    </div>
+</div>
+</body>
+</html>
