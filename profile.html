@@ -42,6 +42,8 @@
 
 
     $(document).ready(function () {
+        $('#header').load("header.html");
+        $('#list').load("list.html");
         $('#modal').load("article-modal.html");
         showNavbarProfileImage(gUserId);
         showMypageSettings(gUserId)
@@ -133,11 +135,11 @@
 
     // 자신이 작성한 글 보기
     function showUserArticles(userId) {
-        $("#content-articles").empty();
+        $("#article-list").empty();
         $("#articles-division").addClass("active");
         $("#comments-division").removeClass("active");
-        $("#content-articles").show();
-        $("#content-comments").hide();
+        $("#article-list").show();
+        $("#comment-list").hide();
 
         $.ajax({
             type : "GET",
@@ -148,30 +150,13 @@
             }
         })
     }
-
-    function makeArticles(articles) {
-        articles.forEach(function (article) {
-            let tmpHtml = ` <div class="col-3">
-                            <div class="card" onclick="getArticle(${article.id})" style="display: inline-block;">
-                                <img class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
-                                <div class="card-body">
-                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 / 좋아요 수 / 댓글 수</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                                </div>
-                            </div>
-                        </div>
-                        `;
-            $('#content-articles').append(tmpHtml);
-        })
-    }
-
     // 자신이 작성한 코멘트 보기
     function showUserComments(userId) {
-        $("#content-comments").empty();
+        $("#comment-list").empty();
         $("#comments-division").addClass("active");
         $("#articles-division").removeClass("active");
-        $("#content-comments").show();
-        $("#content-articles").hide();
+        $("#comment-list").show();
+        $("#article-list").hide();
 
         $.ajax({
             type : "GET",
@@ -186,40 +171,7 @@
 
 <body>
 <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="nav-wrap">
-        <div class="row navbar-nav">
-            <div class="col-2 align-self-center">
-                <a class="nav-item nav-link" href="index.html">홈 </a>
-            </div>
-            <div class="col-8 align-self-center">
-                <div class="row justify-content-md-center">
-                    <div class="col-1">
-                        <a class="nav-item nav-link" href="#">태그</a>
-                    </div>
-                    <div class="col-1">
-                        <a class="nav-item nav-link" href="#">위치</a>
-                    </div>
-                    <div class="col-4">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                    </div>
-                    <div class="col-2">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-2 align-self-center">
-                <div class="row">
-                    <div class="col align-self-center">
-                        <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" onclick="articleModalToggle('add')">게시글 추가</button>
-                    </div>
-                    <div class="col align-self-center" id="nav-user-profile-button">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
+<header id="header"></header>
 
 <!-- profile userinfo division -->
 <div class="profile-content">
@@ -247,12 +199,7 @@
 
 
 <!-- profile content division -->
-<div class="list-wrap">
-    <div class="row card-deck " id="content-articles">
-    </div>
-    <div class="row card-deck" id="content-comments">
-    </div>
-</div>
+<section id="list"></section>
 <section id="modal"></section>
 </body>
 </html>
