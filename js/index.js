@@ -1,7 +1,8 @@
-let hashtagNameList = new Array();
-let imageFileList = new Array();
+const MAX_IMAGE_UPLOAD = 10;
 
-
+let hashtagNameList = [];
+let imageFileDict = {};
+let imageFileDictKey = 0;
 
 function registerEventListener() {
     // 해시태그 입력 리스너
@@ -27,8 +28,8 @@ function registerEventListener() {
 
             let tmpSpan = `<span class="hashtag" 
                                  style="background-color: ${createRandomColor()}" 
-                                 onclick="removeHashtag(this, ${hashtag})">${hashtag}</span>`;
-            $('#hashtag-list').append(tmpSpan)
+                                 onclick="removeHashtag(this, '${hashtag}')">${hashtag}</span>`;
+            $('#hashtag-list').append(tmpSpan);
 
             $('#hashtag-input').val('');
         }
@@ -36,34 +37,34 @@ function registerEventListener() {
 
     // 이미지 파일 입력 리스너
     $('#article-images').on('change', function (e) {
-        console.log("here");
-        var files = e.target.files;
-        var filesArr = Array.prototype.slice.call(files); // TODO: 이미지 저장 배열에서 관리? 제공되는 배열에서 관리? -> 10 limit cnt
+        let files = e.target.files;
+        let filesArr = Array.prototype.slice.call(files);
 
-        // 업로드 된 파일 유효성 체크
-        if (filesArr.length > 10) {
-            alert("이미지는 최대 10개까지 업로드 가능합니다.");
+        // 업로드 될 파일 총 개수 검사
+        let totalFileCnt = Object.keys(imageFileDict).length + filesArr.length
+        if (totalFileCnt > MAX_IMAGE_UPLOAD) {
+            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
             return;
         }
 
-        filesArr.forEach(function(file, idx) {
-            if(!file.type.match("image.*")) {
+        filesArr.forEach(function (file) {
+            if (!file.type.match("image.*")) {
                 alert("이미지 파일만 업로드 가능합니다.");
                 return;
             }
 
-            imageFileList.push(file)
-
             // FIXME: <div> slider
-            var reader = new FileReader();
-            reader.onload = function(e){
-                var tmpHtml = `<div class="article-image-container" id="image-${idx}">
-                                    <img src="${e.target.result}" data-file=${file.name} 
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                imageFileDict[imageFileDictKey] = file;
+
+                let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
+                                <img src="${e.target.result}" data-file=${file.name} 
                                          class="article-image"/>
-                                    <div class="article-image-container-middle" onclick="removeImage(${idx})">
-                                        <div class="text">삭제</div>
-                                     </div>
-                               </div>`
+                                <div class="article-image-container-middle" onclick="removeImage(${imageFileDictKey++})">
+                                    <div class="text">삭제</div>
+                                </div>
+                           </div>`
                 $('#image-list').append(tmpHtml);
             };
             reader.readAsDataURL(file);
@@ -85,11 +86,19 @@ function articleModalToggle(action) {
             $('#article-location-list-div').show();
             $('#pagination').show();
 
+            // 이전에 입력되었던 내용 삭제
+            hashtagNameList = [];
+            imageFileDict = {};
+            imageFileDictKey = 0;
+            $('#article-images').val('');
+        
+            // 위치정보 검색 결과 영역 내용 삭제
             $('#article-location-div').empty();
             $('#pagination').empty();
             $('#article-location-list-div').empty();
-            // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
+
             $('#article-username').text(localStorage.getItem("username"));
+            // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
             break;
         // 게시글 상세보기
         case "get":
@@ -107,7 +116,6 @@ function articleModalToggle(action) {
     }
     $('#article-modal').modal('show');
     $('.modal-dynamic-contents').empty();
-    $('#article-images').val('');
 }
 
 function createRandomColor() {
@@ -117,22 +125,18 @@ function createRandomColor() {
 }
 
 function removeHashtag(span, rmHashtag) {
-    console.log(hashtagNameList);
-
-    hashtagNameList.forEach(function (hashtag, idx) {
-        if(hashtag == rmHashtag) {
-            hashtagNameList.splice(idx, 1);
-            return;
+    for(let i = 0; i < hashtagNameList.length; i++) {
+        if(hashtagNameList[i] == rmHashtag) {
+            hashtagNameList.splice(i, 1);
+            break;
         }
-    })
+    }
     span.remove();
-
-    console.log(hashtagNameList);
 }
 
-function removeImage(idx) {
-    imageFileList.splice(idx, 1);
-    $(`#image-${idx}`).remove();
+function removeImage(key) {
+    delete imageFileDict[key];
+    $(`#image-${key}`).remove();
 }
 
 function addArticle() {
@@ -141,26 +145,28 @@ function addArticle() {
     formData.append("text", $('#article-textarea').val());
     formData.append("location", locationJsonString);
     formData.append("hashtagNameList", hashtagNameList);
-    imageFileList.forEach(function (file) {
-        formData.append("imageFileList", file);
-    })
+
+    Object.keys(imageFileDict).forEach(function (key) {
+        formData.append("imageFileList", imageFileDict[key]);
+    });
 
     $.ajax({
         type: 'POST',
         url: `${LOCALHOST}/articles`,
+        enctype: 'multipart/form-data',
         cache: false,
         contentType: false,
         processData: false,
         data: formData,
         success: function (response) {
             // TODO: 서버로부터 결과값 받기
-            console.log("게시물이 성공적으로 등록됐습니다.");
+            alert("게시물이 성공적으로 등록됐습니다.");
 
             $('#article-modal').modal('hide');
             showArticles();
         },
         fail: function (err) {
-            console.log("fail");
+            alert("fail");
         }
     })
 }
@@ -176,7 +182,7 @@ function showArticles() {
             deleteSelectLocation();
         },
         fail: function (err) {
-            console.log("fail");
+            alert("fail");
         }
     })
 }
@@ -207,7 +213,7 @@ function getArticle(id) {
             makeArticleContents(response);
         },
         fail: function (err) {
-            console.log("fail");
+            alert("fail");
         }
     })
 }
