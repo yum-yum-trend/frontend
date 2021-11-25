@@ -37,33 +37,45 @@ function registerEventListener() {
 
     // 이미지 파일 입력 리스너
     $('#article-images').on('change', function (e) {
-        // 업로드 된 파일 유효성 체크
-        if (Object.keys(imageFileDict).length == MAX_IMAGE_UPLOAD) {
+        let files = e.target.files;
+        let filesArr = Array.prototype.slice.call(files);
+
+        console.log("### file length list ###")
+        console.log("files length = " + files.length);
+        console.log("filesArr length = " + filesArr.length);
+        console.log("imageFileDict length = " + Object.keys(imageFileDict).length);
+
+        // 업로드 될 파일 총 개수 검사
+        let totalFileCnt = Object.keys(imageFileDict).length + filesArr.length
+        console.log("totalFileCnt = " + totalFileCnt);
+        if (totalFileCnt > MAX_IMAGE_UPLOAD) {
             alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
             return;
         }
 
-        let file = e.target.files[0];
-        if (!file.type.match("image.*")) {
-            alert("이미지 파일만 업로드 가능합니다.");
-            return;
-        }
+        filesArr.forEach(function (file) {
+            console.log("filesArr forEach: imageFileDictKey = " + imageFileDictKey);
+            if (!file.type.match("image.*")) {
+                alert("이미지 파일만 업로드 가능합니다.");
+                return;
+            }
 
-        imageFileDict[imageFileDictKey] = file;
+            // FIXME: <div> slider
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                imageFileDict[imageFileDictKey] = file;
 
-        // FIXME: <div> slider
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
+                let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
                                 <img src="${e.target.result}" data-file=${file.name} 
                                          class="article-image"/>
                                 <div class="article-image-container-middle" onclick="removeImage(${imageFileDictKey++})">
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
-            $('#image-list').append(tmpHtml);
-        };
-        reader.readAsDataURL(file);
+                $('#image-list').append(tmpHtml);
+            };
+            reader.readAsDataURL(file);
+        });
     });
 }
 
@@ -134,8 +146,9 @@ function addArticle() {
     $.ajax({
         type: 'POST',
         url: `${LOCALHOST}/articles`,
+        enctype: 'multipart/form-data',
         cache: false,
-        contentType: 'multipart/form-data',
+        contentType: false,
         processData: false,
         data: formData,
         success: function (response) {
