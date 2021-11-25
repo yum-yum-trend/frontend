@@ -2,11 +2,6 @@
     font-family: 'Do Hyeon', sans-serif;
 }
 
-.nav-wrap {
-    width: 1300px;
-    margin: auto;
-}
-
 .nav-link {
     color: rgba(0,0,0,.5);
 }
@@ -37,7 +32,7 @@
 }
 
 .profile-pic{
-    width: 35%;
+    width: 40%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,12 +44,8 @@
     height : 150px;
 }
 
-.for-cursor {
-    cursor: pointer;
-}
-
 .profile-info{
-    width: 65%;
+    width: 60%;
 }
 
 #profile-username{

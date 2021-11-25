@@ -33,7 +33,6 @@
     <script src="/js/index.js"></script>
     <script src="/js/location.js"></script>
 
-
     <title>Yum Yum Trend</title>
 </head>
 <script>
@@ -44,6 +43,7 @@
 
     $(document).ready(function () {
         $('#modal').load("article-modal.html");
+        showNavbarProfileImage(gUserId);
         showMypageSettings(gUserId)
         $("#content-articles").hide();
         $("#content-comments").hide();
@@ -65,6 +65,8 @@
         }
     }
 
+
+    // 프로필 이미지 클릭 시 업로드 창 띄우기
     $(function() {
         $('#user-profile-image').click(function () {
             $("input[name='imageFile']").click();
@@ -77,6 +79,9 @@
             updateUserProfileImage(newProfileImage);
         })
     })
+
+
+    // 변경할 프로필 이미지 업로드
     function updateUserProfileImage(newProfileImage) {
         var formData = new FormData();
         formData.append("newProfileImage", newProfileImage);
@@ -118,10 +123,8 @@
                 }
 
                 if (response.userProfileImageUrl) {
-                    $("#nav-user-profile-image").attr("src", response.userProfileImageUrl);
                     $("#user-profile-image").attr("src", response.userProfileImageUrl);
                 } else {
-                    $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
                     $("#user-profile-image").attr("src", "/images/profile_placeholder.png");
                 }
             }
@@ -141,7 +144,6 @@
             url : `${WEB_SERVER_DOMAIN}/profile/articles/${userId}`,
             data : {},
             success : function (response) {
-                console.log(response);
                 makeArticles(response);
             }
         })
@@ -186,28 +188,35 @@
 <!-- Header -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="nav-wrap">
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">홈</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link ml-2" href="#">태그</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link ml-2" href="#">위치</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link ml-2" href="#">글쓰기</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link ml-2" href="#">프로필<span class="sr-only">(current)</span></a>
-                </li>
-            </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="검색어를 입력해주세요" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
-            </form>
+        <div class="row navbar-nav">
+            <div class="col-2 align-self-center">
+                <a class="nav-item nav-link" href="index.html">홈 </a>
+            </div>
+            <div class="col-8 align-self-center">
+                <div class="row justify-content-md-center">
+                    <div class="col-1">
+                        <a class="nav-item nav-link" href="#">태그</a>
+                    </div>
+                    <div class="col-1">
+                        <a class="nav-item nav-link" href="#">위치</a>
+                    </div>
+                    <div class="col-4">
+                        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">검색</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2 align-self-center">
+                <div class="row">
+                    <div class="col align-self-center">
+                        <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" onclick="articleModalToggle('add')">게시글 추가</button>
+                    </div>
+                    <div class="col align-self-center" id="nav-user-profile-button">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -239,12 +248,11 @@
 
 <!-- profile content division -->
 <div class="list-wrap">
-
     <div class="row card-deck " id="content-articles">
     </div>
     <div class="row card-deck" id="content-comments">
     </div>
 </div>
-<div id="modal"></div>
+<section id="modal"></section>
 </body>
 </html>
