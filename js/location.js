@@ -111,7 +111,7 @@ function selectLocation(idx) {
         "placeName": locationInfoArray[1],
         "xCoordinate": locationInfoArray[2],
         "yCoordinate": locationInfoArray[3],
-        "categoryName": locationInfoArray[4],
+        "categoryName": locationInfoArray[4]
     }
     let tempHtml = `<span id="article-location-span" onClick="deleteSelectLocation()">
                         <li>${locationInfoArray[1]}<i className="fas fa-times"></i>
@@ -130,5 +130,6 @@ function selectLocation(idx) {
 
 function deleteSelectLocation() {
     $("#article-location-div").empty();
-    gLocationInfo = {}
+    gLocationInfo = {};
 }
+

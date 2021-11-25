@@ -82,8 +82,12 @@ function articleModalToggle(action) {
             $('#article-hashtag-input-div').show();
             $('#article-textarea').show();
             $('#user-gps-setting').show();
+            $('#article-location-list-div').show();
+            $('#pagination').show();
 
             $('#article-location-div').empty();
+            $('#pagination').empty();
+            $('#article-location-list-div').empty();
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
             $('#article-username').text(localStorage.getItem("username"));
             break;
@@ -95,7 +99,10 @@ function articleModalToggle(action) {
             $('#article-location-input-div').hide();
             $('#article-hashtag-input-div').hide();
             $('#user-gps-setting').hide();
+            $('#article-location-list-div').hide();
+            $('#pagination').hide();
             $('#article-text-div').show();
+
             break;
     }
     $('#article-modal').modal('show');
@@ -166,6 +173,7 @@ function showArticles() {
         success: function (response) {
             console.log(response);
             makeArticles(response);
+            deleteSelectLocation();
         },
         fail: function (err) {
             console.log("fail");
@@ -210,8 +218,15 @@ function makeArticleContents(article) {
     $('#article-username').text(article.user.username);
     $('#article-text-div').text(article.text);
 
+    <!-- 위치 정보 표시 -->
     $('#article-location-div').empty();
-    let tmpHtml = `<a>${article.location.placeName}</a>`
+    let tmpHtml = ``
+    if (article.location.placeName == "집") {
+        tmpHtml = `<a>${article.location.placeName}</a>`
+    } else {
+        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.location.placeName},
+                ${article.location.ycoordinate},${article.location.xcoordinate}">${article.location.placeName}</a>`
+    }
     $('#article-location-div').append(tmpHtml);
 
     $('#image-list').empty();
