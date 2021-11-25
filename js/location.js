@@ -50,7 +50,7 @@ function getLocation(currentPage) {
         url: (gLat
             ? `https://dapi.kakao.com/v2/local/search/keyword.json?y=${gLat}&x=${gLng}&radius=2000&page=${currentPage}&size=${KAKAO_LOCATION_SIZE}&query=` + encodeURIComponent($("#search-input").val())
             : `https://dapi.kakao.com/v2/local/search/keyword.json?&page=${currentPage}&size=${KAKAO_LOCATION_SIZE}&query=` + encodeURIComponent($("#search-input").val())),
-        headers: {'Authorization': `KakaoAK ${KAKAO_SEARCH_API_KEY}`},
+        headers: {'Authorization': `KakaoAK ${KAKAO_REST_API_KEY}`},
         success: function (response) {
             console.log(response)
             let tempHtml = ``

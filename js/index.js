@@ -152,7 +152,7 @@ function addArticle() {
 
     $.ajax({
         type: 'POST',
-        url: `${LOCALHOST}/articles`,
+        url: `${WEB_SERVER_DOMAIN}/articles`,
         enctype: 'multipart/form-data',
         cache: false,
         contentType: false,
@@ -175,7 +175,7 @@ function addArticle() {
 function showArticles() {
     $.ajax({
         type: 'GET',
-        url: `${LOCALHOST}/articles`,
+        url: `${WEB_SERVER_DOMAIN}/articles`,
         success: function (response) {
             console.log(response);
             makeArticles(response);
@@ -208,7 +208,7 @@ function makeArticles(articles) {
 function getArticle(id) {
     $.ajax({
         type: 'GET',
-        url: `${LOCALHOST}/articles/${id}`,
+        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
         success: function (response) {
             makeArticleContents(response);
         },

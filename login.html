@@ -19,7 +19,7 @@
     <meta charset="UTF-8">
 
     <!-- Custom JS / CSS -->
-    <script src="/secret/secret.js"></script>
+    <script src="/secret/secrets.js"></script>
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <meta charset="UTF-8">
 
@@ -34,7 +34,7 @@
         }
         $.ajax({
             type: 'POST',
-            url: `${LOCALHOST}/login`,
+            url: `${WEB_SERVER_DOMAIN}/login`,
             contentType: "application/json",
             data: JSON.stringify(info),
             success: function (response) {
@@ -52,7 +52,7 @@
             success: function (authObj) {
                 $.ajax({
                     type: 'POST',
-                    url: `${LOCALHOST}/login/kakao`,
+                    url: `${WEB_SERVER_DOMAIN}/login/kakao`,
                     contentType: "application/json",
                     data: JSON.stringify({'token': authObj['access_token']}),
                     success: function (response) {
