@@ -81,7 +81,9 @@ function articleModalToggle(action) {
             $('#article-location-input-div').show();
             $('#article-hashtag-input-div').show();
             $('#article-textarea').show();
+            $('#user-gps-setting').show();
 
+            $('#article-location-div').empty();
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
             $('#article-username').text(localStorage.getItem("username"));
             break;
@@ -92,6 +94,7 @@ function articleModalToggle(action) {
             $('#article-image-form').hide();
             $('#article-location-input-div').hide();
             $('#article-hashtag-input-div').hide();
+            $('#user-gps-setting').hide();
             $('#article-text-div').show();
             break;
     }
@@ -127,8 +130,9 @@ function removeImage(idx) {
 
 function addArticle() {
     let formData = new FormData();
+    let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
-    formData.append("location", $('#article-location-span').text());
+    formData.append("location", locationJsonString);
     formData.append("hashtagNameList", hashtagNameList);
     imageFileList.forEach(function (file) {
         formData.append("imageFileList", file);
@@ -205,7 +209,10 @@ function makeArticleContents(article) {
 
     $('#article-username').text(article.user.username);
     $('#article-text-div').text(article.text);
-    $('#article-location-span').text(article.location);
+
+    $('#article-location-div').empty();
+    let tmpHtml = `<a>${article.location.placeName}</a>`
+    $('#article-location-div').append(tmpHtml);
 
     $('#image-list').empty();
     article.imageList.forEach(function (image) {

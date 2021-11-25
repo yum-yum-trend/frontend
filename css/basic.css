@@ -134,7 +134,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-.pagination-size {
-    height: 15px;
+.gps-setting {
+    margin-bottom: 5px;
 }

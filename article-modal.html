@@ -36,15 +36,14 @@
                     </div>
                     <div class="text-line-limit">
                         <i class="fas fa-map-marker-alt article-content-icon" aria-hidden="true"></i> 위치
-                        <span onclick="gpsSetting()" id="gps-setting">GPS 설정 <i class="fas fa-map-marker"></i></span>
+                        <div class="gps-setting" id="user-gps-setting" onclick="gpsSetting()" >GPS 설정 <i class="fas fa-map-marker"></i></div>
                         <div class="input-group mb-3" id="article-location-input-div">
                             <input id="search-input" type="text" class="form-control" placeholder="지도">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        <div id="article-location-div" onclick="deleteSelectLocation()">
-                            <span id="article-location-span"></span>
+                        <div id="article-location-div" >
                             <!-- <div id="article-location-div" class="modal-dynamic-contents"> -->
                         </div>
                         <div id="article-location-list-div">

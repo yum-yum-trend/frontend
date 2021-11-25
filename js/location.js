@@ -14,14 +14,14 @@ function locationRegisterEventListener() {
 }
 
 function gpsSetting() {
-    if ($("#gps-setting").children().hasClass("fa-map-marker-alt")) {
-        $("#gps-setting").children().addClass("fa-map-marker")
-        $("#gps-setting").children().removeClass("fa-map-marker-alt")
+    if ($("#user-gps-setting").children().hasClass("fa-map-marker-alt")) {
+        $("#user-gps-setting").children().addClass("fa-map-marker")
+        $("#user-gps-setting").children().removeClass("fa-map-marker-alt")
         gLat = undefined;
         gLng = undefined;
     } else {
-        $("#gps-setting").children().addClass("fa-map-marker-alt")
-        $("#gps-setting").children().removeClass("fa-map-marker")
+        $("#user-gps-setting").children().addClass("fa-map-marker-alt")
+        $("#user-gps-setting").children().removeClass("fa-map-marker")
         getCoordinate()
     }
 }
@@ -113,10 +113,13 @@ function selectLocation(idx) {
         "yCoordinate": locationInfoArray[3],
         "categoryName": locationInfoArray[4],
     }
-    let tempHtml = `<li>${locationInfoArray[1]} <i class="fas fa-times"></i></li>`
+    let tempHtml = `<span id="article-location-span" onClick="deleteSelectLocation()">
+                        <li>${locationInfoArray[1]}<i className="fas fa-times"></i>
+                        </li>
+                    </span>`
 
 
-    $("#article-location-span").html(tempHtml)
+    $("#article-location-div").html(tempHtml)
     $("#article-location-list-div").empty();
     $("#pagination").empty();
     $("#search-input").val("");
@@ -126,6 +129,6 @@ function selectLocation(idx) {
 }
 
 function deleteSelectLocation() {
-    $("#article-location-span").empty();
+    $("#article-location-div").empty();
     gLocationInfo = {}
 }
