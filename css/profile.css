@@ -3,7 +3,7 @@
 }
 
 .nav-wrap {
-    width: 1000px;
+    width: 1300px;
     margin: auto;
 }
 
@@ -21,13 +21,19 @@
 
 .profile-content {
     height: 225px;
-    width: 1000px;
+    width: 1300px;
+    margin: auto;
+    display: flex;
+}
+
+.profile-content-nav {
+    width: 1300px;
     margin: auto;
     display: flex;
 }
 
 .profile-hr {
-    width: 1000px;
+    width: 1300px;
 }
 
 .profile-pic{
@@ -69,13 +75,13 @@
 }
 
 .content-articles {
-    width: 1000px;
+    width: 1300px;
     margin:auto;
     display: block;
 }
 
 .content-comments {
-    width: 1000px;
+    width: 1300px;
     margin:auto;
     display: block;
 }

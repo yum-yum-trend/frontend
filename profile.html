@@ -28,16 +28,22 @@
     <!-- Custom JS / CSS -->
     <script src="/secret/secrets.js"></script>
     <script src="/js/basic.js"></script>
+    <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <link href="/css/profile.css" rel="stylesheet" type="text/css">
+    <script src="/js/index.js"></script>
+    <script src="/js/location.js"></script>
+
+
     <title>Yum Yum Trend</title>
 </head>
 <script>
     const gUserId = localStorage.getItem('userId')
-    const gProfileUserId = location.href.split("/")[-1]
+    const gProfileUserId = location.href.split("/")[-1] // /profile/1
     const gIsMypage = (gUserId == gProfileUserId) ? true : true;
 
 
     $(document).ready(function () {
+        $('#modal').load("article-modal.html");
         showMypageSettings(gUserId)
         $("#content-articles").hide();
         $("#content-comments").hide();
@@ -77,7 +83,7 @@
 
         $.ajax({
             type: "POST",
-            url: `${LOCALHOST}/profile/imagechange/${gUserId}`,
+            url: `${WEB_SERVER_DOMAIN}/profile/imagechange/${gUserId}`,
             cache: false,
             contentType: false,
             processData: false,
@@ -96,7 +102,7 @@
     function showUserProfileInfo(userId) {
         $.ajax({
             type : "GET",
-            url : `${LOCALHOST}/profile/${userId}`,
+            url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
             data : {},
             success : function (response) {
                 if (response.username){
@@ -122,13 +128,6 @@
         })
     }
 
-    // 프로필 사진 변경하기
-    function changeImage(userId) {
-
-        console.log(userId)
-
-    }
-
     // 자신이 작성한 글 보기
     function showUserArticles(userId) {
         $("#content-articles").empty();
@@ -139,7 +138,7 @@
 
         $.ajax({
             type : "GET",
-            url : `${LOCALHOST}/profile/articles/${userId}`,
+            url : `${WEB_SERVER_DOMAIN}/profile/articles/${userId}`,
             data : {},
             success : function (response) {
                 console.log(response);
@@ -174,7 +173,7 @@
 
         $.ajax({
             type : "GET",
-            url : `${LOCALHOST}/profile/comments/${userId}`,
+            url : `${WEB_SERVER_DOMAIN}/profile/comments/${userId}`,
             data : {},
             success : function (response) {
 
@@ -226,7 +225,7 @@
 <hr class="profile-hr">
 
 <!-- profile content button division -->
-<div class="profile-content justify-content-center">
+<div class="profile-content-nav justify-content-center">
     <ul class="nav">
         <li class="nav-item">
             <a class="nav-link" id="articles-division" onclick="showUserArticles(localStorage.getItem('userId'))" href="#">Articles</a>
@@ -237,12 +236,15 @@
     </ul>
 </div>
 
+
 <!-- profile content division -->
-<div class="profile-content">
-    <div class="row card-deck" id="content-articles">
+<div class="list-wrap">
+
+    <div class="row card-deck " id="content-articles">
     </div>
     <div class="row card-deck" id="content-comments">
     </div>
 </div>
+<div id="modal"></div>
 </body>
 </html>
