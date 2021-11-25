@@ -18,8 +18,7 @@
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script><meta charset="UTF-8">
 
     <!-- Custom JS / CSS -->
-    <script src="/secret/keys.js"></script>
-    <script src="/secret/hosts.js"></script>
+    <script src="/secret/secrets.js"></script>
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <meta charset="UTF-8">
 
@@ -35,7 +34,7 @@
         }
         $.ajax({
             type: 'POST',
-            url: `${LOCALHOST}/signup`,
+            url: `${WEB_SERVER_DOMAIN}/signup`,
             contentType: "application/json",
             data: JSON.stringify(info),
             success: function (response) {
