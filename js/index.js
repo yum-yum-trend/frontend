@@ -40,21 +40,14 @@ function registerEventListener() {
         let files = e.target.files;
         let filesArr = Array.prototype.slice.call(files);
 
-        console.log("### file length list ###")
-        console.log("files length = " + files.length);
-        console.log("filesArr length = " + filesArr.length);
-        console.log("imageFileDict length = " + Object.keys(imageFileDict).length);
-
         // 업로드 될 파일 총 개수 검사
         let totalFileCnt = Object.keys(imageFileDict).length + filesArr.length
-        console.log("totalFileCnt = " + totalFileCnt);
         if (totalFileCnt > MAX_IMAGE_UPLOAD) {
             alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
             return;
         }
 
         filesArr.forEach(function (file) {
-            console.log("filesArr forEach: imageFileDictKey = " + imageFileDictKey);
             if (!file.type.match("image.*")) {
                 alert("이미지 파일만 업로드 가능합니다.");
                 return;
@@ -89,12 +82,21 @@ function articleModalToggle(action) {
             $('#article-location-input-div').show();
             $('#article-hashtag-input-div').show();
             $('#article-textarea').show();
+            $('#user-gps-setting').show();
+            $('#article-location-list-div').show();
+            $('#pagination').show();
 
             // 이전에 입력되었던 내용 삭제
             hashtagNameList = [];
             imageFileDict = {};
             imageFileDictKey = 0;
             $('#article-images').val('');
+        
+            // 위치정보 검색 결과 영역 내용 삭제
+            $('#article-location-div').empty();
+            $('#pagination').empty();
+            $('#article-location-list-div').empty();
+
             $('#article-username').text(localStorage.getItem("username"));
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
             break;
@@ -105,7 +107,11 @@ function articleModalToggle(action) {
             $('#article-image-form').hide();
             $('#article-location-input-div').hide();
             $('#article-hashtag-input-div').hide();
+            $('#user-gps-setting').hide();
+            $('#article-location-list-div').hide();
+            $('#pagination').hide();
             $('#article-text-div').show();
+
             break;
     }
     $('#article-modal').modal('show');
@@ -135,8 +141,9 @@ function removeImage(key) {
 
 function addArticle() {
     let formData = new FormData();
+    let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
-    formData.append("location", $('#article-location-span').text());
+    formData.append("location", locationJsonString);
     formData.append("hashtagNameList", hashtagNameList);
 
     Object.keys(imageFileDict).forEach(function (key) {
@@ -172,6 +179,7 @@ function showArticles() {
         success: function (response) {
             console.log(response);
             makeArticles(response);
+            deleteSelectLocation();
         },
         fail: function (err) {
             alert("fail");
@@ -215,7 +223,17 @@ function makeArticleContents(article) {
 
     $('#article-username').text(article.user.username);
     $('#article-text-div').text(article.text);
-    $('#article-location-span').text(article.location);
+
+    <!-- 위치 정보 표시 -->
+    $('#article-location-div').empty();
+    let tmpHtml = ``
+    if (article.location.placeName == "집") {
+        tmpHtml = `<a>${article.location.placeName}</a>`
+    } else {
+        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.location.placeName},
+                ${article.location.ycoordinate},${article.location.xcoordinate}">${article.location.placeName}</a>`
+    }
+    $('#article-location-div').append(tmpHtml);
 
     $('#image-list').empty();
     article.imageList.forEach(function (image) {
@@ -231,3 +249,4 @@ function makeArticleContents(article) {
         $('#hashtag-list').append(tmpSpan)
     })
 }
+
