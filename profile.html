@@ -26,230 +26,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
 
     <!-- Custom JS / CSS -->
-    <script src="/secret/secrets.js"></script>
-    <script src="/js/basic.js"></script>
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <link href="/css/profile.css" rel="stylesheet" type="text/css">
+    <script src="/js/basic.js"></script>
     <script src="/js/index.js"></script>
     <script src="/js/location.js"></script>
+    <script src="/js/profile.js"></script>
+    <script src="/secret/secrets.js"></script>
 
     <title>Yum Yum Trend</title>
 </head>
 <script>
-    const gUserId = localStorage.getItem('userId')
-    const gUsername = localStorage.getItem('username')
-    const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.location.href)[1]
-    const gIsMyPage = (gUserId === gProfileUserId) ? true : false;
 
-
-    $(document).ready(function () {
-        $('#header').load("header.html");
-        $('#list').load("list.html");
-        $('#article-modal').load("article-modal.html");
-        $("#article-list").hide();
-        $("#comment-list").hide();
-        showNavbarProfileImage(gUserId);
-        showMyPageSettings()
-        showUserProfileInfo(gProfileUserId)
-        showUserArticles(gProfileUserId)
-    })
-
-    // 유저에 따른 프로필 이미지 변경 & 설정 버튼 활성화 여부
-    function showMyPageSettings() {
-        if (gIsMyPage) {
-            let profilePictureButtonActive = `<img id="user-profile-image" class="for-cursor" title="프로필 사진 추가" src="" alt="profile image">
-                                                <input class="form-control" type="file" accept="img/*" id="imageFile" name="imageFile" style="display:none;">`
-            let settingButtonActive = `<button type="button" id="setting-button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#profile-change-modal">설정</button>`
-            $('#profile-pic').append(profilePictureButtonActive)
-            $('#setting-button-div').append(settingButtonActive)
-        } else {
-            let profilePictureButtonInactive = `<img id="user-profile-image" src="" alt="profile image">`
-            $('#profile-pic').append(profilePictureButtonInactive)
-        }
-    }
-
-
-    // 프로필 이미지 클릭 시 업로드 창 띄우기
-    $(function() {
-        $('#user-profile-image').click(function () {
-            $("input[name='imageFile']").click();
-        })
-
-        $('#imageFile').on('change', function (e) {
-            e.preventDefault();
-            var newProfileImage = e.target.files[0];
-
-            updateUserProfileImage(newProfileImage);
-        })
-    })
-
-
-    // 변경할 프로필 이미지 업로드
-    function updateUserProfileImage(newProfileImage) {
-        var formData = new FormData();
-        formData.append("newProfileImage", newProfileImage);
-
-        $.ajax({
-            type: "POST",
-            url: `${WEB_SERVER_DOMAIN}/profile/image-change/${gUserId}`,
-            cache: false,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function () {
-                location.reload();
-            },
-            error: function (request, status, error) {
-                alert("code:" + request.status + "\n" + "error:" + error);
-            }
-        })
-    }
-
-    // 프로필 기본 정보 불러오기 (username, intro, 사진)
-    function showUserProfileInfo(userId) {
-        $.ajax({
-            type : "GET",
-            url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
-            data : {},
-            success : function (response) {
-                console.log(response)
-                $('#profile-username').text(response.username);
-                $('#profile-email').text(response.email);
-
-                if (response.kakaoId){
-                    $('#password-to-change-form').hide();
-                    $('#password-to-change-check-form').hide();
-                    $('#present-password-form').hide();
-                }
-
-                if (response.userProfileIntro) {
-                    $('#profile-introduction').text(response.userProfileIntro);
-                    $('#profile-text-to-change').val(response.userProfileIntro);
-                }
-
-                if (response.userProfileImageUrl) {
-                    $("#user-profile-image").attr("src", response.userProfileImageUrl);
-                } else {
-                    $("#user-profile-image").attr("src", "/images/profile_placeholder.png");
-                }
-            }
-        })
-    }
-
-    // 프로필 사진 초기화
-    function resetProfileImage(userId) {
-        let response = confirm("프로필 사진을 초기화 하시겠습니까?");
-        if (response) {
-            $.ajax({
-                type: "GET",
-                url: `${WEB_SERVER_DOMAIN}/profile/image-reset/${userId}`,
-                data: {},
-                success: function (response) {
-                    alert("프로필 사진이 초기화 되었습니다.");
-                    $('#profile-change-modal').modal('hide');
-                    location.reload();
-                }
-            })
-        }
-    }
-
-    // 유저 정보 변경 (비밀번호, 상태 메시지)
-    function updateUserProfileInfo(userId) {
-        let presentPassword = $("#present-password").val();
-        let newPassword = $("#password-to-change").val();
-        let newPasswordCheck = $("#password-to-change-check").val();
-        let newProfileText = $("#profile-text-to-change").val();
-
-        if (newPassword !== newPasswordCheck) {
-            alert("새 비밀번호가 서로 동일하지 않습니다.")
-        } else {
-            $.ajax({
-                type : "POST",
-                url : `${WEB_SERVER_DOMAIN}/profile/update/${userId}`,
-                contentType: "application/json",
-                data: JSON.stringify({
-                    nowPassword : presentPassword,
-                    newPassword : newPassword,
-                    userProfileIntro : newProfileText
-                }),
-                success: function (response) {
-                    if (response === "success") {
-                        alert("변경되었습니다.")
-                        $('#profile-change-modal').modal('hide');
-                        location.reload();
-                    } else if (response === "passwordError") {
-                        alert("현재 비밀번호가 맞지 않습니다.")
-                    }
-                }
-            })
-        }
-    }
-
-    // 자신이 작성한 글 보기
-    function showUserArticles(userId) {
-        $("#article-list").empty();
-        $("#articles-division").addClass("active");
-        $("#bookmarks-division").removeClass("active");
-        $("#comments-division").removeClass("active");
-        $("#comment-list").hide();
-        $("#article-list").show();
-
-        $.ajax({
-            type : "GET",
-            url : `${WEB_SERVER_DOMAIN}/profile/articles/${userId}`,
-            data : {},
-            success : function (response) {
-                makeArticles(response);
-            }
-        })
-    }
-
-    // 자신이 저장한 글 보기
-    function showUserBookmarks(userId) {
-        $("#article-list").empty();
-        $("#articles-division").removeClass("active");
-        $("#bookmarks-division").addClass("active");
-        $("#comments-division").removeClass("active");
-        $("#comment-list").hide();
-        $("#article-list").show();
-
-        $.ajax({
-            type : "GET",
-            url : `${WEB_SERVER_DOMAIN}/profile/bookmarks/${userId}`,
-            data : {},
-            success : function (response) {
-                makeArticles(response);
-            }
-        })
-    }
-
-    // 자신이 작성한 코멘트 보기
-    function showUserComments(userId) {
-        $("#comment-list").empty();
-        $("#articles-division").removeClass("active");
-        $("#bookmarks-division").removeClass("active");
-        $("#comments-division").addClass("active");
-        $("#article-list").hide();
-        $("#comment-list").show();
-
-        $.ajax({
-            type : "GET",
-            url : `${WEB_SERVER_DOMAIN}/profile/comments/${userId}`,
-            data : {},
-            success : function (response) {
-                makeComments(response);
-            }
-        })
-    }
-
-    function makeComments(response) {
-        // 댓글 기능 완성 후 작성 예정
-    }
 </script>
 
 <body>
 <!-- Header -->
 <header id="header"></header>
+
 
 <!-- profile userinfo division -->
 <div class="profile-content">
@@ -262,6 +56,7 @@
         <div id="profile-introduction"></div>
     </div>
 </div>
+
 
 <!-- profile info change modal division -->
 <div class="modal fade" id="profile-change-modal" tabindex="-1" role="dialog" aria-labelledby="profile-change-modal-label" aria-hidden="true">
@@ -276,15 +71,15 @@
             <div class="modal-body">
                 <form>
                     <div class="form-group" id="present-password-form">
-                        <label for="password-to-change" class="col-form-label">현재 비밀번호:</label>
+                        <label for="present-password" class="col-form-label">현재 비밀번호: (비밀번호 변경 시 입력)</label>
                         <input type="password" class="form-control" id="present-password">
                     </div>
                     <div class="form-group" id="password-to-change-form">
-                        <label for="password-to-change" class="col-form-label">비밀번호 변경:</label>
+                        <label for="password-to-change" class="col-form-label">비밀번호 변경: (비밀번호 변경 시 입력)</label>
                         <input type="password" class="form-control" id="password-to-change">
                     </div>
                     <div class="form-group" id="password-to-change-check-form">
-                        <label for="password-to-change-check" class="col-form-label">비밀번호 변경 재확인:</label>
+                        <label for="password-to-change-check" class="col-form-label">비밀번호 변경 재확인: (비밀번호 변경 시 입력)</label>
                         <input type="password" class="form-control" id="password-to-change-check">
                     </div>
                     <div class="form-group">
