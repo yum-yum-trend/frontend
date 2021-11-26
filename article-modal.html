@@ -43,13 +43,13 @@
                                 <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        <div id="article-location-div" >
+                        <div id="article-location-div" class="modal-dynamic-contents">
                             <!-- <div id="article-location-div" class="modal-dynamic-contents"> -->
                         </div>
-                        <div id="article-location-list-div">
+                        <div id="article-location-list-div" class="modal-dynamic-contents">
 
                         </div>
-                        <ul class="pagination" style="justify-content: center; " id="pagination">
+                        <ul class="pagination" style="justify-content: center; " id="pagination" class="modal-dynamic-contents">
                         </ul>
                     </div>
                     <div>
@@ -67,8 +67,13 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button기 id="add-article-btn" type="button" class="btn btn-primary" onclick="addArticle()">게시하기
-                </button기>
+                <button id="add-article-btn" type="button" class="btn btn-primary" onclick="addArticle()">
+                    게시하기
+                </button>
+                <button id="update-article-btn" type="button" class="btn btn-primary"
+                        onclick="" style="display: none;">
+                    수정하기
+                </button>
             </div>
         </div>
     </div>

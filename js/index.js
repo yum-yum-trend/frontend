@@ -4,6 +4,15 @@ let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
+let gArticle;
+
+
+/* 사용자 구별 */
+function isMe(userId) {
+    return (localStorage.getItem("userId") == userId);
+}
+
+/* 리스너 등록 함수 */
 function registerEventListener() {
     // 해시태그 입력 리스너
     $("#hashtag-input").keydown(function(e) {
@@ -61,7 +70,7 @@ function registerEventListener() {
                 let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
                                 <img src="${e.target.result}" data-file=${file.name} 
                                          class="article-image"/>
-                                <div class="article-image-container-middle" onclick="removeImage(${imageFileDictKey++})">
+                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
@@ -70,13 +79,29 @@ function registerEventListener() {
             reader.readAsDataURL(file);
         });
     });
+
+    // 모달 닫힘 리스너
+    $('#article-modal').on('hidden.bs.modal', function (e) {
+        console.log("modal close");
+        // 이전에 입력되었던 내용 삭제
+        hashtagNameList = [];
+        imageFileDict = {};
+        imageFileDictKey = 0;
+        deleteSelectLocation();
+        
+        $('#article-images').val('');
+        $('#article-textarea').val('');
+        $('.modal-dynamic-contents').empty();
+    })
 }
 
+/* 게시물 추가/보기/수정 모달 내용 토글 */
 function articleModalToggle(action) {
     switch(action) {
         // 게시글 추가
         case "add":
             $('#article-text-div').hide();
+            $('#update-article-btn').hide();
             $('#add-article-btn').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
@@ -85,12 +110,6 @@ function articleModalToggle(action) {
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
             $('#pagination').show();
-
-            // 이전에 입력되었던 내용 삭제
-            hashtagNameList = [];
-            imageFileDict = {};
-            imageFileDictKey = 0;
-            $('#article-images').val('');
         
             // 위치정보 검색 결과 영역 내용 삭제
             $('#article-location-div').empty();
@@ -99,10 +118,13 @@ function articleModalToggle(action) {
 
             $('#article-username').text(localStorage.getItem("username"));
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
+
+            $('#article-modal').modal('show');
             break;
         // 게시글 상세보기
         case "get":
             $('#add-article-btn').hide();
+            $('#update-article-btn').hide();
             $('#article-textarea').hide();
             $('#article-image-form').hide();
             $('#article-location-input-div').hide();
@@ -112,10 +134,22 @@ function articleModalToggle(action) {
             $('#pagination').hide();
             $('#article-text-div').show();
 
+            $('#article-modal').modal('show');
             break;
+        // 게시글 업데이트
+        case "update":
+            $('#add-article-btn').hide();
+            $('#article-textarea').show();
+            $('#article-image-form').show();
+            $('#article-location-input-div').show();
+            $('#article-hashtag-input-div').show();
+            $('#user-gps-setting').show();
+            $('#article-location-list-div').show();
+            $('#pagination').show();
+            $('#article-text-div').hide();
+
+            $('.modal-dynamic-contents').empty();
     }
-    $('#article-modal').modal('show');
-    $('.modal-dynamic-contents').empty();
 }
 
 function createRandomColor() {
@@ -134,7 +168,7 @@ function removeHashtag(span, rmHashtag) {
     span.remove();
 }
 
-function removeImage(key) {
+function removeImageElement(key) {
     delete imageFileDict[key];
     $(`#image-${key}`).remove();
 }
@@ -179,7 +213,6 @@ function showArticles() {
         success: function (response) {
             console.log(response);
             makeArticles(response);
-            deleteSelectLocation();
         },
         fail: function (err) {
             alert("fail");
@@ -210,7 +243,9 @@ function getArticle(id) {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
         success: function (response) {
-            makeArticleContents(response);
+            gArticle = response;
+            articleModalToggle("get");
+            makeArticleContents("get");
         },
         fail: function (err) {
             alert("fail");
@@ -218,35 +253,127 @@ function getArticle(id) {
     })
 }
 
-function makeArticleContents(article) {
-    articleModalToggle("get");
 
-    $('#article-username').text(article.user.username);
-    $('#article-text-div').text(article.text);
+function makeArticleContents(action) {
+    if (action == "get") {
+        $('#article-username').text(gArticle.user.username);
+        $('#article-text-div').text(gArticle.text);
 
-    <!-- 위치 정보 표시 -->
-    $('#article-location-div').empty();
-    let tmpHtml = ``
-    if (article.location.placeName == "집") {
-        tmpHtml = `<a>${article.location.placeName}</a>`
-    } else {
-        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.location.placeName},
-                ${article.location.ycoordinate},${article.location.xcoordinate}">${article.location.placeName}</a>`
-    }
-    $('#article-location-div').append(tmpHtml);
+        <!-- 위치 정보 표시 -->
+        let tmpHtml = ``
+        if (gArticle.location.placeName == "집") {
+            tmpHtml = `<a>${gArticle.location.placeName}</a>`
+        } else {
+            tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${gArticle.location.placeName},
+                ${gArticle.location.ycoordinate},${gArticle.location.xcoordinate}">${gArticle.location.placeName}</a>`
+        }
+        $('#article-location-div').append(tmpHtml);
 
-    $('#image-list').empty();
-    article.imageList.forEach(function (image) {
-        let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
+        gArticle.imageList.forEach(function (image) {
+            let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                             <img src="${image.url}" class="article-image"/>
                        </div>`
-        $('#image-list').append(tmpHtml);
-    })
+            $('#image-list').append(tmpHtml);
+        })
 
-    $('#hashtag-list').empty();
-    article.hashtagList.forEach(function (hashtag) {
-        let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
-        $('#hashtag-list').append(tmpSpan)
+        gArticle.hashtagList.forEach(function (hashtag) {
+            let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
+            $('#hashtag-list').append(tmpSpan)
+        })
+
+        // 게시물 작성자와 사용자 구별
+        if(isMe(gArticle.user.id)) {
+            $('#update-article-btn').show();
+            $('#update-article-btn').html('수정하기');
+            $('#update-article-btn').attr("onclick", "articleModalToggle('update'); makeArticleContents('update')");
+        }
+    }
+    else if (action == "update") {
+        gLocationInfo = gArticle.location;
+        gLocationInfo = {
+            "roadAddressName": gLocationInfo.roadAddressName,
+            "placeName": gLocationInfo.placeName,
+            "xCoordinate": gLocationInfo.xCoordinate,
+            "yCoordinate": gLocationInfo.yCoordinate,
+            "categoryName": gLocationInfo.categoryName
+        }
+
+        gArticle.hashtagList.forEach(function (hashtag) {
+            hashtagNameList.push(hashtag.tag);
+        })
+
+        console.log("[update] gLocationInfo   = " + gLocationInfo);
+        console.log("[update] hashtagNameList = " + hashtagNameList);
+
+        $('#article-username').text(gArticle.user.username);
+        $('#article-textarea').text(gArticle.text);
+
+        <!-- 위치 정보 표시 -->
+        let tmpHtml = ``
+        if (gArticle.location.placeName == "집") {
+            gLocationInfo = {}; // 다시 입력받아야 하므로 값을 초기화 시켜주기
+            tmpHtml = `<a>${gArticle.location.placeName}</a>`
+        } else {
+            tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${gArticle.location.placeName},
+                ${gArticle.location.ycoordinate},${gArticle.location.xcoordinate}">${gArticle.location.placeName}</a>`
+        }
+        $('#article-location-div').append(tmpHtml);
+
+        gArticle.imageList.forEach(function (image) {
+            let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
+                                <img src="${image.url}" class="article-image"/>
+                                 <div class="article-image-container-middle" onclick="deleteImage(${image.id})">
+                                    <div class="text">삭제</div>
+                                </div>
+                           </div>`
+            $('#image-list').append(tmpHtml);
+        })
+
+        gArticle.hashtagList.forEach(function (hashtag) {
+            let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}"  
+                                 onclick="removeHashtag(this, '${hashtag.tag}')">${hashtag.tag}</span>`;
+            $('#hashtag-list').append(tmpSpan)
+        })
+
+        $('#update-article-btn').html('게시하기');
+        $('#update-article-btn').attr("onclick", `updateArticle(${gArticle.id})`);
+    }
+}
+
+/* 게시물 수정하기 */
+function updateArticle(id) {
+    let formData = new FormData();
+    let locationJsonString = JSON.stringify(gLocationInfo)
+    formData.append("text", $('#article-textarea').val());
+    formData.append("location", locationJsonString);
+    formData.append("hashtagNameList", hashtagNameList);
+
+    Object.keys(imageFileDict).forEach(function (key) {
+        formData.append("imageFileList", imageFileDict[key]);
+    });
+
+    $.ajax({
+        type: 'POST',
+        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
+        enctype: 'multipart/form-data',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: formData,
+        success: function (response) {
+            alert("게시물이 성공적으로 수정됐습니다.");
+
+            $('#article-modal').modal('hide');
+            showArticles();
+        },
+        fail: function (err) {
+            alert("fail");
+        }
     })
 }
+
+function deleteImage(id) {
+
+}
+
 
