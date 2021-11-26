@@ -37,29 +37,30 @@
 </head>
 <script>
     const gUserId = localStorage.getItem('userId')
-    const gProfileUserId = location.href.split("/")[-1] // /profile/1
-    const gIsMypage = (gUserId == gProfileUserId) ? true : true;
+    const gUsername = localStorage.getItem('username')
+    const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.location.href)[1]
+    const gIsMyPage = (gUserId === gProfileUserId) ? true : false;
 
 
     $(document).ready(function () {
         $('#header').load("header.html");
         $('#list').load("list.html");
-        $('#modal').load("article-modal.html");
+        $('#article-modal').load("article-modal.html");
+        $("#article-list").hide();
+        $("#comment-list").hide();
         showNavbarProfileImage(gUserId);
-        showMypageSettings(gUserId)
-        $("#content-articles").hide();
-        $("#content-comments").hide();
-        showUserProfileInfo(gUserId)
-        showUserArticles(gUserId)
+        showMyPageSettings()
+        showUserProfileInfo(gProfileUserId)
+        showUserArticles(gProfileUserId)
     })
 
     // 유저에 따른 프로필 이미지 변경 & 설정 버튼 활성화 여부
-    function showMypageSettings(userId) {
-        if (gIsMypage) {
+    function showMyPageSettings() {
+        if (gIsMyPage) {
             let profilePictureButtonActive = `<img id="user-profile-image" class="for-cursor" title="프로필 사진 추가" src="" alt="profile image">
                                                 <input class="form-control" type="file" accept="img/*" id="imageFile" name="imageFile" style="display:none;">`
+            let settingButtonActive = `<button type="button" id="setting-button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#profile-change-modal">설정</button>`
             $('#profile-pic').append(profilePictureButtonActive)
-            let settingButtonActive = `<button id="setting-button" class="btn btn-outline-secondary">설정</button>`
             $('#setting-button-div').append(settingButtonActive)
         } else {
             let profilePictureButtonInactive = `<img id="user-profile-image" src="" alt="profile image">`
@@ -90,7 +91,7 @@
 
         $.ajax({
             type: "POST",
-            url: `${WEB_SERVER_DOMAIN}/profile/imagechange/${gUserId}`,
+            url: `${WEB_SERVER_DOMAIN}/profile/image-change/${gUserId}`,
             cache: false,
             contentType: false,
             processData: false,
@@ -104,7 +105,6 @@
         })
     }
 
-
     // 프로필 기본 정보 불러오기 (username, intro, 사진)
     function showUserProfileInfo(userId) {
         $.ajax({
@@ -112,16 +112,19 @@
             url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
             data : {},
             success : function (response) {
-                if (response.username){
-                    $('#profile-username').text(response.username);
-                } else {
-                    $('#profile-username').text(response.kakaoId);
+                console.log(response)
+                $('#profile-username').text(response.username);
+                $('#profile-email').text(response.email);
+
+                if (response.kakaoId){
+                    $('#password-to-change-form').hide();
+                    $('#password-to-change-check-form').hide();
+                    $('#present-password-form').hide();
                 }
 
                 if (response.userProfileIntro) {
                     $('#profile-introduction').text(response.userProfileIntro);
-                } else {
-                    $('#profile-introduction').text("자기소개를 작성해보세요.");
+                    $('#profile-text-to-change').val(response.userProfileIntro);
                 }
 
                 if (response.userProfileImageUrl) {
@@ -133,13 +136,63 @@
         })
     }
 
+    // 프로필 사진 초기화
+    function resetProfileImage(userId) {
+        let response = confirm("프로필 사진을 초기화 하시겠습니까?");
+        if (response) {
+            $.ajax({
+                type: "GET",
+                url: `${WEB_SERVER_DOMAIN}/profile/image-reset/${userId}`,
+                data: {},
+                success: function (response) {
+                    alert("프로필 사진이 초기화 되었습니다.");
+                    $('#profile-change-modal').modal('hide');
+                    location.reload();
+                }
+            })
+        }
+    }
+
+    // 유저 정보 변경 (비밀번호, 상태 메시지)
+    function updateUserProfileInfo(userId) {
+        let presentPassword = $("#present-password").val();
+        let newPassword = $("#password-to-change").val();
+        let newPasswordCheck = $("#password-to-change-check").val();
+        let newProfileText = $("#profile-text-to-change").val();
+
+        if (newPassword !== newPasswordCheck) {
+            alert("새 비밀번호가 서로 동일하지 않습니다.")
+        } else {
+            $.ajax({
+                type : "POST",
+                url : `${WEB_SERVER_DOMAIN}/profile/update/${userId}`,
+                contentType: "application/json",
+                data: JSON.stringify({
+                    nowPassword : presentPassword,
+                    newPassword : newPassword,
+                    userProfileIntro : newProfileText
+                }),
+                success: function (response) {
+                    if (response === "success") {
+                        alert("변경되었습니다.")
+                        $('#profile-change-modal').modal('hide');
+                        location.reload();
+                    } else if (response === "passwordError") {
+                        alert("현재 비밀번호가 맞지 않습니다.")
+                    }
+                }
+            })
+        }
+    }
+
     // 자신이 작성한 글 보기
     function showUserArticles(userId) {
         $("#article-list").empty();
         $("#articles-division").addClass("active");
+        $("#bookmarks-division").removeClass("active");
         $("#comments-division").removeClass("active");
-        $("#article-list").show();
         $("#comment-list").hide();
+        $("#article-list").show();
 
         $.ajax({
             type : "GET",
@@ -150,22 +203,47 @@
             }
         })
     }
+
+    // 자신이 저장한 글 보기
+    function showUserBookmarks(userId) {
+        $("#article-list").empty();
+        $("#articles-division").removeClass("active");
+        $("#bookmarks-division").addClass("active");
+        $("#comments-division").removeClass("active");
+        $("#comment-list").hide();
+        $("#article-list").show();
+
+        $.ajax({
+            type : "GET",
+            url : `${WEB_SERVER_DOMAIN}/profile/bookmarks/${userId}`,
+            data : {},
+            success : function (response) {
+                makeArticles(response);
+            }
+        })
+    }
+
     // 자신이 작성한 코멘트 보기
     function showUserComments(userId) {
         $("#comment-list").empty();
-        $("#comments-division").addClass("active");
         $("#articles-division").removeClass("active");
-        $("#comment-list").show();
+        $("#bookmarks-division").removeClass("active");
+        $("#comments-division").addClass("active");
         $("#article-list").hide();
+        $("#comment-list").show();
 
         $.ajax({
             type : "GET",
             url : `${WEB_SERVER_DOMAIN}/profile/comments/${userId}`,
             data : {},
             success : function (response) {
-
+                makeComments(response);
             }
         })
+    }
+
+    function makeComments(response) {
+        // 댓글 기능 완성 후 작성 예정
     }
 </script>
 
@@ -179,20 +257,66 @@
     </div>
     <div class="profile-info">
         <div id="profile-username"></div>
+        <div id="profile-email"></div>
         <div id="setting-button-div"></div>
         <div id="profile-introduction"></div>
     </div>
 </div>
+
+<!-- profile info change modal division -->
+<div class="modal fade" id="profile-change-modal" tabindex="-1" role="dialog" aria-labelledby="profile-change-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profile-change-modal-label">설정</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group" id="present-password-form">
+                        <label for="password-to-change" class="col-form-label">현재 비밀번호:</label>
+                        <input type="password" class="form-control" id="present-password">
+                    </div>
+                    <div class="form-group" id="password-to-change-form">
+                        <label for="password-to-change" class="col-form-label">비밀번호 변경:</label>
+                        <input type="password" class="form-control" id="password-to-change">
+                    </div>
+                    <div class="form-group" id="password-to-change-check-form">
+                        <label for="password-to-change-check" class="col-form-label">비밀번호 변경 재확인:</label>
+                        <input type="password" class="form-control" id="password-to-change-check">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-text-to-change" class="col-form-label">상태 메세지:</label>
+                        <textarea class="form-control" id="profile-text-to-change" placeholder="상태 메세지를 작성해보세요"></textarea>
+                    </div>
+                </form>
+                <button type="button" class="btn btn-danger" onclick="resetProfileImage(`${gUserId}`)">프로필 사진 초기화</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="updateUserProfileInfo(`${gUserId}`)">변경 내용 저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <hr class="profile-hr">
+
 
 <!-- profile content button division -->
 <div class="profile-content-nav justify-content-center">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" id="articles-division" onclick="showUserArticles(localStorage.getItem('userId'))" href="#">Articles</a>
+            <a class="nav-link" id="articles-division" onclick="showUserArticles(`${gUserId}`)" href="#">Articles</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="comments-division" onclick="showUserComments(localStorage.getItem('userId'))"  href="#">Comments</a>
+            <a class="nav-link" id="bookmarks-division" onclick="showUserBookmarks(`${gUserId}`)"  href="#">Bookmarks</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="comments-division" onclick="showUserComments(`${gUserId}`)"  href="#">Comments</a>
         </li>
     </ul>
 </div>
@@ -200,6 +324,6 @@
 
 <!-- profile content division -->
 <section id="list"></section>
-<section id="modal"></section>
+<section id="article-modal"></section>
 </body>
 </html>

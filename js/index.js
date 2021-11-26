@@ -252,7 +252,7 @@ function makeArticleContents(article) {
 function showNavbarProfileImage(userId) {
     $.ajax({
         type: "GET",
-        url: `${WEB_SERVER_DOMAIN}/profile/navbarimage/${userId}`,
+        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
         data : {},
         success : function (response) {
             let temphtml = `<div class="nav-item nav-link" >

@@ -46,22 +46,30 @@
 
 .profile-info{
     width: 60%;
+    display: flex;
 }
 
 #profile-username{
-    position: absolute;
-    margin : 50px auto auto auto;
+    position: relative;
+    margin : 50px 0 0 0;
     font-size: xx-large;
 }
 
+#profile-email{
+    position: relative;
+    margin : 68px 0 0 20px;
+    vertical-align: bottom;
+    font-size: medium;
+}
+
 #setting-button{
-    position: absolute;
-    margin : 50px auto auto 250px;
+    position: relative;
+    margin : 50px 0 0 20px;
 }
 
 #profile-introduction{
     position: absolute;
-    margin : 130px auto auto auto;
+    margin : 130px 0 0 0;
     font-size: large;
 }
 
