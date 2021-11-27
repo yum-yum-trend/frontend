@@ -3,11 +3,11 @@ const MAX_IMAGE_UPLOAD = 10;
 let tagNames = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
+let totalImageFileCnt = 0;
 
 let gArticle;
 
 $(document).ready(function () {
-    console.log("ready")
     $('#header').load("header.html");
     $('#list').load("list.html");
     $('#modal').load("article-modal.html");
@@ -58,9 +58,10 @@ function registerEventListener() {
         let filesArr = Array.prototype.slice.call(files);
 
         // 업로드 될 파일 총 개수 검사
-        let totalFileCnt = Object.keys(imageFileDict).length + filesArr.length
-        if (totalFileCnt > MAX_IMAGE_UPLOAD) {
+        totalImageFileCnt = Object.keys(imageFileDict).length + filesArr.length
+        if (totalImageFileCnt > MAX_IMAGE_UPLOAD) {
             alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
+            totalImageFileCnt -= filesArr.length;
             return;
         }
 
@@ -78,11 +79,13 @@ function registerEventListener() {
                 let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
                                 <img src="${e.target.result}" data-file=${file.name} 
                                          class="article-image"/>
-                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
+                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey})">
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
                 $('#image-list').append(tmpHtml);
+
+                imageFileDictKey++;
             };
             reader.readAsDataURL(file);
         });
@@ -90,7 +93,6 @@ function registerEventListener() {
 
     // 모달 닫힘 리스너
     $('#article-modal').on('hidden.bs.modal', function (e) {
-        console.log("modal close");
         // 이전에 입력되었던 내용 삭제
         tagNames = [];
         imageFileDict = {};
@@ -179,9 +181,22 @@ function removeTag(span, rmTag) {
 function removeImageElement(key) {
     delete imageFileDict[key];
     $(`#image-${key}`).remove();
+    totalImageFileCnt--;
+}
+
+function checkArticleImagesInput() {
+    console.log(totalImageFileCnt);
+    if(totalImageFileCnt == 0) {
+        alert("최소 1개 이상의 이미지를 업로드해야합니다.");
+        return false;
+    }
+
+    return true;
 }
 
 function addArticle() {
+    if(!checkArticleImagesInput()) return;
+
     let formData = new FormData();
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
@@ -310,9 +325,6 @@ function makeArticleContents(action) {
             tagNames.push(tag.name);
         })
 
-        console.log("[update] gLocationInfo   = " + gLocationInfo);
-        console.log("[update] tagNames = " + tagNames);
-
         $('#article-username').text(gArticle.user.username);
         $('#article-textarea').val(gArticle.text);
 
@@ -327,10 +339,11 @@ function makeArticleContents(action) {
         }
         $('#article-location-div').append(tmpHtml);
 
+        totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
+            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="this.remove(); totalImageFileCnt--; deleteImage(${image.id})">
                                 <img src="${image.url}" class="article-image"/>
-                                 <div class="article-image-container-middle" onclick="deleteImage(${image.id})">
+                                 <div class="article-image-container-middle" >
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
@@ -350,6 +363,8 @@ function makeArticleContents(action) {
 
 /* 게시물 수정하기 */
 function updateArticle(id) {
+    if(!checkArticleImagesInput()) return;
+
     let formData = new FormData();
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
@@ -359,6 +374,7 @@ function updateArticle(id) {
     Object.keys(imageFileDict).forEach(function (key) {
         formData.append("imageFiles", imageFileDict[key]);
     });
+
 
     $.ajax({
         type: 'POST',
@@ -381,5 +397,15 @@ function updateArticle(id) {
 }
 
 function deleteImage(id) {
-
+    $.ajax({
+        type: 'DELETE',
+        url: `${WEB_SERVER_DOMAIN}/articles/image/${id}`,
+        enctype: 'multipart/form-data',
+        success: function (response) {
+            alert("업로드된 이미지를 삭제했습니다.");
+        },
+        fail: function (err) {
+            alert("fail");
+        }
+    })
 }
