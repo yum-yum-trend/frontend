@@ -111,8 +111,9 @@ function articleModalToggle(action) {
         // 게시글 추가
         case "add":
             $('#article-text-div').hide();
-            $('#update-article-btn').hide();
-            $('#add-article-btn').show();
+            $('#article-update-btn').hide();
+            $('#article-delete-btn').hide();
+            $('#article-add-btn').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
             $('#article-tag-input-div').show();
@@ -133,8 +134,9 @@ function articleModalToggle(action) {
             break;
         // 게시글 상세보기
         case "get":
-            $('#add-article-btn').hide();
-            $('#update-article-btn').hide();
+            $('#article-add-btn').hide();
+            $('#article-update-btn').hide();
+            $('#article-delete-btn').hide();
             $('#article-textarea').hide();
             $('#article-image-form').hide();
             $('#article-location-input-div').hide();
@@ -148,7 +150,8 @@ function articleModalToggle(action) {
             break;
         // 게시글 업데이트
         case "update":
-            $('#add-article-btn').hide();
+            $('#article-add-btn').hide();
+            $('#article-delete-btn').hide();
             $('#article-textarea').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
@@ -276,7 +279,7 @@ function getArticle(id) {
     })
 }
 
-
+/* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
     if (action == "get") {
         $('#article-username').text(gArticle.user.username);
@@ -306,9 +309,11 @@ function makeArticleContents(action) {
 
         // 게시물 작성자와 사용자 구별
         if(isMe(gArticle.user.id)) {
-            $('#update-article-btn').show();
-            $('#update-article-btn').html('수정하기');
-            $('#update-article-btn').attr("onclick", "articleModalToggle('update'); makeArticleContents('update')");
+            $('#article-delete-btn').show();
+            $('#article-delete-btn').attr("onclick", `deleteArticle(${gArticle.id})`)
+            $('#article-update-btn').show();
+            $('#article-update-btn').html('수정하기');
+            $('#article-update-btn').attr("onclick", "$('#article-delete-btn').hide(); articleModalToggle('update'); makeArticleContents('update')");
         }
     }
     else if (action == "update") {
@@ -356,12 +361,12 @@ function makeArticleContents(action) {
             $('#tag-list').append(tmpSpan)
         })
 
-        $('#update-article-btn').html('게시하기');
-        $('#update-article-btn').attr("onclick", `updateArticle(${gArticle.id})`);
+        $('#article-update-btn').html('게시하기');
+        $('#article-update-btn').attr("onclick", `updateArticle(${gArticle.id})`);
     }
 }
 
-/* 게시물 수정하기 */
+/* 게시물 수정 */
 function updateArticle(id) {
     if(!checkArticleImagesInput()) return;
 
@@ -396,6 +401,25 @@ function updateArticle(id) {
     })
 }
 
+/* 게시물 삭제 */
+function deleteArticle(id) {
+    $.ajax({
+        type: 'DELETE',
+        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
+        enctype: 'multipart/form-data',
+        success: function (response) {
+            alert("게시물을 성공적으로 삭제했습니다.");
+
+            $('#article-modal').hide();
+            window.location.reload(); // FIXME: 병합 시 다른 팀원 코드와 일치 시키기
+        },
+        fail: function (err) {
+            alert("fail");
+        }
+    })
+}
+
+/* 이미지 삭제 (게시물 수정) */
 function deleteImage(id) {
     $.ajax({
         type: 'DELETE',
