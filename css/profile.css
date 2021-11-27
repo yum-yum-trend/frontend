@@ -2,11 +2,6 @@
     font-family: 'Do Hyeon', sans-serif;
 }
 
-.nav-wrap {
-    width: 1300px;
-    margin: auto;
-}
-
 .nav-link {
     color: rgba(0,0,0,.5);
 }
@@ -37,7 +32,7 @@
 }
 
 .profile-pic{
-    width: 35%;
+    width: 40%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,38 +44,36 @@
     height : 150px;
 }
 
-.for-cursor {
-    cursor: pointer;
-}
-
 .profile-info{
-    width: 65%;
+    width: 60%;
+    display: flex;
 }
 
 #profile-username{
-    position: absolute;
-    margin : 50px auto auto auto;
+    position: relative;
+    margin : 50px 0 0 0;
     font-size: xx-large;
 }
 
+#profile-email{
+    position: relative;
+    margin : 68px 0 0 20px;
+    vertical-align: bottom;
+    font-size: medium;
+}
+
 #setting-button{
-    position: absolute;
-    margin : 50px auto auto 250px;
+    position: relative;
+    margin : 50px 0 0 20px;
 }
 
 #profile-introduction{
     position: absolute;
-    margin : 130px auto auto auto;
+    margin : 130px 0 0 0;
     font-size: large;
 }
 
 .content-articles {
-    width: 1300px;
-    margin:auto;
-    display: block;
-}
-
-.content-comments {
     width: 1300px;
     margin:auto;
     display: block;

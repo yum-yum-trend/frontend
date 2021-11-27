@@ -177,7 +177,6 @@ function showArticles() {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/articles`,
         success: function (response) {
-            console.log(response);
             makeArticles(response);
             deleteSelectLocation();
         },
@@ -247,6 +246,26 @@ function makeArticleContents(article) {
     article.hashtagList.forEach(function (hashtag) {
         let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
         $('#hashtag-list').append(tmpSpan)
+    })
+}
+
+function showNavbarProfileImage(userId) {
+    $.ajax({
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
+        data : {},
+        success : function (response) {
+            let temphtml = `<div class="nav-item nav-link" >
+                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" onclick="location.href='profile.html?userId=${userId}'">
+                            </div>`
+            $('#nav-user-profile-button').append(temphtml)
+
+            if (response) {
+                $("#nav-user-profile-image").attr("src", response);
+            } else {
+                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+            }
+        }
     })
 }
 
