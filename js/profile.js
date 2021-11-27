@@ -7,11 +7,19 @@ $(document).ready(function () {
     $('#header').load("header.html");
     $('#list').load("list.html");
     $('#article-modal').load("article-modal.html");
+    checkLoginStatus();
     showNavbarProfileImage(gUserId);
     showMyPageSettings()
     showUserProfileInfo(gProfileUserId)
     showUserArticles(gProfileUserId)
 })
+
+// localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
+function checkLoginStatus() {
+    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
+        location.href = 'login.html'
+    }
+}
 
 // 유저에 따른 프로필 이미지 변경 & 설정 버튼 활성화 여부
 function showMyPageSettings() {

@@ -4,17 +4,6 @@ let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
-$(document).ready(function () {
-    checkLoginStatus();
-})
-
-// localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
-function checkLoginStatus() {
-    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
-        location.href = 'login.html'
-    }
-}
-
 function registerEventListener() {
     // 해시태그 입력 리스너
     $("#hashtag-input").keydown(function(e) {
@@ -262,28 +251,34 @@ function makeArticleContents(article) {
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
-    $.ajax({
-        type: "GET",
-        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
-        data : {},
-        success : function (response) {
-            let temphtml = `<div class="nav-item nav-link" >
-                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                  <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
-                                  </div>
-                            </div>`
-            $('#nav-user-profile-button').append(temphtml)
+    if (userId) {
+        $.ajax({
+            type: "GET",
+            url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
+            data : {},
+            success : function (response) {
+                let tempHtml = `<div class="nav-item nav-link" >
+                                    <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
+                                      </div>
+                                </div>`
+                $('#nav-user-profile-button').append(tempHtml)
 
-            if (response) {
-                $("#nav-user-profile-image").attr("src", response);
-            } else {
-                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+                if (response) {
+                    $("#nav-user-profile-image").attr("src", response);
+                } else {
+                    $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+                }
             }
-        }
-    })
+        })
+    } else {
+        // FIXME : 버튼이 화면에 출력이 안 돼요 ㅠㅠㅠ 로그인 안 한 상태로 index.html 진입 시 보이게 좀 도와주세요
+        let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
+        $('#nav-user-profile-button').append(tempHtml)
+    }
 }
 
 // 로그아웃 (로그인 페이지로 이동)
@@ -291,5 +286,5 @@ function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("userId");
-    location.href = 'login.html';
+    location.reload();
 }
