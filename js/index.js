@@ -1,5 +1,6 @@
 const MAX_IMAGE_UPLOAD = 10;
 
+let articleStatus = "-list";
 let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
@@ -72,11 +73,24 @@ function registerEventListener() {
     });
 }
 
+function modalEventListener() {
+    // 모달 꺼졌을 때 상태 확인 리스너
+    $('#article-modal').on('hide.bs.modal', function (e) {
+        articleStatus = "-list";
+        window.location.reload();
+    })
+
+    $('#article-modal').on('show.bs.modal', function (e) {
+        articleStatus = "-modal";
+    })
+}
+
 function articleModalToggle(action) {
     switch(action) {
         // 게시글 추가
         case "add":
             $('#article-text-div').hide();
+            $('#article-like-count').hide();
             $('#add-article-btn').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
@@ -86,16 +100,12 @@ function articleModalToggle(action) {
             $('#article-location-list-div').show();
             $('#pagination').show();
 
+
             // 이전에 입력되었던 내용 삭제
             hashtagNameList = [];
             imageFileDict = {};
             imageFileDictKey = 0;
             $('#article-images').val('');
-        
-            // 위치정보 검색 결과 영역 내용 삭제
-            $('#article-location-div').empty();
-            $('#pagination').empty();
-            $('#article-location-list-div').empty();
 
             $('#article-username').text(localStorage.getItem("username"));
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
@@ -111,6 +121,7 @@ function articleModalToggle(action) {
             $('#article-location-list-div').hide();
             $('#pagination').hide();
             $('#article-text-div').show();
+            $('#article-like-count').show();
 
             break;
     }
@@ -196,14 +207,14 @@ function makeArticles(articles) {
                                 <div id="card-body" class="card-body">`
 
         if(article.likes) {
-            tmpHtml += `<span id="like-icon-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
+            tmpHtml += `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                                 </div>
                             </div>
                         </div>`;
         } else {
-            tmpHtml += `<span id="like-icon-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
+            tmpHtml += `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                                 </div>
@@ -215,16 +226,14 @@ function makeArticles(articles) {
     })
 }
 
-
-
 function toggleLike(articleId) {
-    if ($(`#like-icon-${articleId}`).find("i").hasClass("far")) {
-        $(`#like-icon-${articleId}`).find("i").addClass("fas");
-        $(`#like-icon-${articleId}`).find("i").removeClass("far");
+    if ($(`#like-icon${articleStatus}-${articleId}`).find("i").hasClass("far")) {
+        $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("fas");
+        $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("far");
         addLike(articleId)
     } else {
-        $(`#like-icon-${articleId}`).find("i").addClass("far");
-        $(`#like-icon-${articleId}`).find("i").removeClass("fas");
+        $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("far");
+        $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("fas");
         deleteLike(articleId)
     }
 }
@@ -234,7 +243,11 @@ function addLike(articleId) {
         type: "PUT",
         url: `${WEB_SERVER_DOMAIN}/articles/like?articleId=${articleId}`,
         success: function(response) {
-            showArticles()
+            if (articleStatus == "-list") {
+                showArticles()
+            } else if (articleStatus == "-modal") {
+                getArticle(articleId);
+            }
         },
         fail: function (err) {
             alert("fail");
@@ -247,7 +260,11 @@ function deleteLike(articleId) {
         type: "PUT",
         url: `${WEB_SERVER_DOMAIN}/articles/unlike?articleId=${articleId}`,
         success: function(response) {
-            showArticles()
+            if (articleStatus == "-list") {
+                showArticles()
+            } else if (articleStatus == "-modal") {
+                getArticle(articleId);
+            }
         },
         fail: function (err) {
             alert("fail");
@@ -261,6 +278,7 @@ function getArticle(id) {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
         success: function (response) {
+            console.log(response)
             makeArticleContents(response);
         },
         fail: function (err) {
@@ -272,22 +290,22 @@ function getArticle(id) {
 function makeArticleContents(article) {
     articleModalToggle("get");
 
-    $('#article-username').text(article.user.username);
-    $('#article-text-div').text(article.text);
+    $('#article-username').text(article.article.user.username);
+    $('#article-text-div').text(article.article.text);
 
     <!-- 위치 정보 표시 -->
     $('#article-location-div').empty();
     let tmpHtml = ``
-    if (article.location.placeName == "집") {
-        tmpHtml = `<a>${article.location.placeName}</a>`
+    if (article.article.location.placeName == "집") {
+        tmpHtml = `<a>${article.article.location.placeName}</a>`
     } else {
-        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.location.placeName},
-                ${article.location.ycoordinate},${article.location.xcoordinate}">${article.location.placeName}</a>`
+        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.article.location.placeName},
+                ${article.article.location.ycoordinate},${article.article.location.xcoordinate}">${article.article.location.placeName}</a>`
     }
     $('#article-location-div').append(tmpHtml);
 
     $('#image-list').empty();
-    article.imageList.forEach(function (image) {
+    article.article.imageList.forEach(function (image) {
         let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                             <img src="${image.url}" class="article-image"/>
                        </div>`
@@ -295,10 +313,20 @@ function makeArticleContents(article) {
     })
 
     $('#hashtag-list').empty();
-    article.hashtagList.forEach(function (hashtag) {
+    article.article.hashtagList.forEach(function (hashtag) {
         let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
         $('#hashtag-list').append(tmpSpan)
-    })
+    });
+
+    <!-- 좋아요 표시 -->
+    $('#article-like-count').empty();
+    if (article.likes) {
+        let tempHtml = `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(article.likeCount)}</span>`
+        $('#article-like-count').append(tempHtml);
+    } else {
+        let tempHtml = `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(article.likeCount)}</span>`
+        $('#article-like-count').append(tempHtml);
+    }
 }
 
 // 좋아요 수 편집 (K로 나타내기)
