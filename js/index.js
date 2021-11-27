@@ -341,8 +341,10 @@ function makeArticleContents(action) {
             console.log(gArticle.location)
             console.log(gLocationInfo)
 
-            tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${gArticle.location.placeName},
-                ${gArticle.location.xcoordinate},${gArticle.location.ycoordinate}">${gArticle.location.placeName}</a>`
+            tmpHtml = `<span id="article-location-span" onClick="deleteSelectLocation()">
+                            <li>${gLocationInfo["placeName"]}<i className="fas fa-times"></i>
+                            </li>
+                       </span>`
         }
         $('#article-location-div').append(tmpHtml);
 
