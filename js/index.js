@@ -317,15 +317,6 @@ function makeArticleContents(action) {
         }
     }
     else if (action == "update") {
-        gLocationInfo = gArticle.location;
-        gLocationInfo = {
-            "roadAddressName": gLocationInfo.roadAddressName,
-            "placeName": gLocationInfo.placeName,
-            "xCoordinate": gLocationInfo.xCoordinate,
-            "yCoordinate": gLocationInfo.yCoordinate,
-            "categoryName": gLocationInfo.categoryName
-        }
-
         gArticle.tags.forEach(function (tag) {
             tagNames.push(tag.name);
         })
@@ -339,14 +330,25 @@ function makeArticleContents(action) {
             gLocationInfo = {}; // 다시 입력받아야 하므로 값을 초기화 시켜주기
             tmpHtml = `<a>${gArticle.location.placeName}</a>`
         } else {
+            gLocationInfo = {
+                "roadAddressName": gArticle.location.roadAddressName,
+                "placeName": gArticle.location.placeName,
+                "xCoordinate": gArticle.location.xcoordinate,
+                "yCoordinate": gArticle.location.ycoordinate,
+                "categoryName": gArticle.location.categoryName
+            }
+
+            console.log(gArticle.location)
+            console.log(gLocationInfo)
+
             tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${gArticle.location.placeName},
-                ${gArticle.location.ycoordinate},${gArticle.location.xcoordinate}">${gArticle.location.placeName}</a>`
+                ${gArticle.location.xcoordinate},${gArticle.location.ycoordinate}">${gArticle.location.placeName}</a>`
         }
         $('#article-location-div').append(tmpHtml);
 
         totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="this.remove(); totalImageFileCnt--; deleteImage(${image.id})">
+            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="totalImageFileCnt--; deleteImage(${image.id}, this)">
                                 <img src="${image.url}" class="article-image"/>
                                  <div class="article-image-container-middle" >
                                     <div class="text">삭제</div>
@@ -370,6 +372,8 @@ function makeArticleContents(action) {
 function updateArticle(id) {
     if(!checkArticleImagesInput()) return;
 
+    // TODO: Loading page enable
+
     let formData = new FormData();
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
@@ -390,6 +394,8 @@ function updateArticle(id) {
         processData: false,
         data: formData,
         success: function (response) {
+            // TODO: Loading page disable
+
             alert("게시물이 성공적으로 수정됐습니다.");
 
             $('#article-modal').modal('hide');
@@ -403,11 +409,13 @@ function updateArticle(id) {
 
 /* 게시물 삭제 */
 function deleteArticle(id) {
+    // TODO: Loading page enable
     $.ajax({
         type: 'DELETE',
         url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
         enctype: 'multipart/form-data',
         success: function (response) {
+            // TODO: Loading page disable
             alert("게시물을 성공적으로 삭제했습니다.");
 
             $('#article-modal').hide();
@@ -420,13 +428,16 @@ function deleteArticle(id) {
 }
 
 /* 이미지 삭제 (게시물 수정) */
-function deleteImage(id) {
+function deleteImage(id, img) {
+    // TODO: Loading page enable
     $.ajax({
         type: 'DELETE',
         url: `${WEB_SERVER_DOMAIN}/articles/image/${id}`,
         enctype: 'multipart/form-data',
         success: function (response) {
+            // TODO: Loading page disable
             alert("업로드된 이미지를 삭제했습니다.");
+            img.remove();
         },
         fail: function (err) {
             alert("fail");
