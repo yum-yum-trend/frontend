@@ -191,16 +191,67 @@ function makeArticles(articles) {
     $('#article-list').empty();
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
-                            <div class="card" onclick="getArticle(${article.id})" style="display: inline-block;">
-                                <img class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
-                                <div class="card-body">
-                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 / 좋아요 수 / 댓글 수</p>
+                            <div class="card" style="display: inline-block;">
+                                <img onclick="getArticle(${article.article.id})" class="card-img-top" src="${article.article.imageList[0].url}" alt="Card image cap" width="100px">
+                                <div id="card-body" class="card-body">`
+
+        if(article.likes) {
+            tmpHtml += `<span id="like-icon-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
+                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                                 </div>
                             </div>
-                        </div>
-                        `;
+                        </div>`;
+        } else {
+            tmpHtml += `<span id="like-icon-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
+                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
+                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                                </div>
+                            </div>
+                        </div>`;
+        }
+
         $('#article-list').append(tmpHtml);
+    })
+}
+
+
+
+function toggleLike(articleId) {
+    if ($(`#like-icon-${articleId}`).find("i").hasClass("far")) {
+        $(`#like-icon-${articleId}`).find("i").addClass("fas");
+        $(`#like-icon-${articleId}`).find("i").removeClass("far");
+        addLike(articleId)
+    } else {
+        $(`#like-icon-${articleId}`).find("i").addClass("far");
+        $(`#like-icon-${articleId}`).find("i").removeClass("fas");
+        deleteLike(articleId)
+    }
+}
+
+function addLike(articleId) {
+    $.ajax({
+        type: "PUT",
+        url: `${WEB_SERVER_DOMAIN}/articles/like?articleId=${articleId}`,
+        success: function(response) {
+            showArticles()
+        },
+        fail: function (err) {
+            alert("fail");
+        }
+    })
+}
+
+function deleteLike(articleId) {
+    $.ajax({
+        type: "PUT",
+        url: `${WEB_SERVER_DOMAIN}/articles/unlike?articleId=${articleId}`,
+        success: function(response) {
+            showArticles()
+        },
+        fail: function (err) {
+            alert("fail");
+        }
     })
 }
 
@@ -250,3 +301,16 @@ function makeArticleContents(article) {
     })
 }
 
+// 좋아요 수 편집 (K로 나타내기)
+function num2str(likesCount) {
+    if (likesCount > 10000) {
+        return parseInt(likesCount / 1000) + "k"
+    }
+    if (likesCount > 500) {
+        return parseInt(likesCount / 100) / 10 + "k"
+    }
+    if (likesCount == 0) {
+        return ""
+    }
+    return likesCount
+}
