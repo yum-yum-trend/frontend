@@ -5,21 +5,32 @@ let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
+$(document).ready(function () {
+    checkLoginStatus();
+})
+
+// localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
+function checkLoginStatus() {
+    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
+        location.href = 'login.html'
+    }
+}
+
 function registerEventListener() {
     // 해시태그 입력 리스너
-    $("#hashtag-input").keydown(function(e) {
-         // 엔터키 입력 체크
+    $("#hashtag-input").keydown(function (e) {
+        // 엔터키 입력 체크
         if (e.keyCode == 13) {
             let hashtag = $('#hashtag-input').val();
-            if(hashtag == '' || hashtag == '#') {
+            if (hashtag == '' || hashtag == '#') {
                 return;
             }
 
-            if(!hashtag.charAt(0) != '#') {
+            if (!hashtag.charAt(0) != '#') {
                 hashtag = '#' + hashtag;
             }
 
-            if(hashtagNameList.includes(hashtag)) {
+            if (hashtagNameList.includes(hashtag)) {
                 alert("이미 입력한 해시태그입니다.");
                 $('#hashtag-input').val('');
                 return;
@@ -44,7 +55,7 @@ function registerEventListener() {
         // 업로드 될 파일 총 개수 검사
         let totalFileCnt = Object.keys(imageFileDict).length + filesArr.length
         if (totalFileCnt > MAX_IMAGE_UPLOAD) {
-            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
+            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD + "개까지 업로드 가능합니다.");
             return;
         }
 
@@ -86,7 +97,7 @@ function modalEventListener() {
 }
 
 function articleModalToggle(action) {
-    switch(action) {
+    switch (action) {
         // 게시글 추가
         case "add":
             $('#article-text-div').hide();
@@ -136,8 +147,8 @@ function createRandomColor() {
 }
 
 function removeHashtag(span, rmHashtag) {
-    for(let i = 0; i < hashtagNameList.length; i++) {
-        if(hashtagNameList[i] == rmHashtag) {
+    for (let i = 0; i < hashtagNameList.length; i++) {
+        if (hashtagNameList[i] == rmHashtag) {
             hashtagNameList.splice(i, 1);
             break;
         }
@@ -188,7 +199,6 @@ function showArticles() {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/articles`,
         success: function (response) {
-            console.log(response);
             makeArticles(response);
             deleteSelectLocation();
         },
@@ -206,7 +216,7 @@ function makeArticles(articles) {
                                 <img onclick="getArticle(${article.article.id})" class="card-img-top" src="${article.article.imageList[0].url}" alt="Card image cap" width="100px">
                                 <div id="card-body" class="card-body">`
 
-        if(article.likes) {
+        if (article.likes) {
             tmpHtml += `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
@@ -242,7 +252,7 @@ function addLike(articleId) {
     $.ajax({
         type: "PUT",
         url: `${WEB_SERVER_DOMAIN}/articles/like?articleId=${articleId}`,
-        success: function(response) {
+        success: function (response) {
             if (articleStatus == "-list") {
                 showArticles()
             } else if (articleStatus == "-modal") {
@@ -259,7 +269,7 @@ function deleteLike(articleId) {
     $.ajax({
         type: "PUT",
         url: `${WEB_SERVER_DOMAIN}/articles/unlike?articleId=${articleId}`,
-        success: function(response) {
+        success: function (response) {
             if (articleStatus == "-list") {
                 showArticles()
             } else if (articleStatus == "-modal") {
@@ -341,4 +351,38 @@ function num2str(likesCount) {
         return ""
     }
     return likesCount
+}
+
+// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
+function showNavbarProfileImage(userId) {
+    $.ajax({
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
+        data: {},
+        success: function (response) {
+            let temphtml = `<div class="nav-item nav-link" >
+                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
+                                  </div>
+                            </div>`
+            $('#nav-user-profile-button').append(temphtml)
+
+            if (response) {
+                $("#nav-user-profile-image").attr("src", response);
+            } else {
+                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+            }
+        }
+    })
+}
+
+// 로그아웃 (로그인 페이지로 이동)
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    location.href = 'login.html';
 }
