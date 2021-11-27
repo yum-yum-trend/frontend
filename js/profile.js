@@ -112,6 +112,12 @@ function resetProfileImage(userId) {
     }
 }
 
+// 비밀번호 정규식
+function checkPassword(password) {
+    let regExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,16}$/;
+    return regExp.test(password);
+}
+
 // 유저 정보 변경 (비밀번호, 상태 메시지)
 function updateUserProfileInfo(userId) {
     let presentPassword = $("#present-password").val();
@@ -127,32 +133,36 @@ function updateUserProfileInfo(userId) {
         return alert("변경할 비밀번호를 입력해주세요.")
     }
 
-    if (newPassword !== newPasswordCheck) {
-        alert("새 비밀번호가 서로 동일하지 않습니다.")
-    } else {
-        $.ajax({
-            type : "PUT",
-            url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
-            contentType: "application/json",
-            data: JSON.stringify({
-                nowPassword : presentPassword,
-                newPassword : newPassword,
-                userProfileIntro : newProfileText
-            }),
-            success: function () {
-                alert("변경되었습니다.")
-                $('#profile-change-modal').modal('hide');
-                location.reload();
-            },
-            error: function (request) {
-                if (request.status === 401) {
-                    alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
-                } else {
-                    alert(`에러가 발생했습니다.\n변경 사항은 저장되지 않았습니다.\nError Code: ${request.status}`)
-                }
-            }
-        })
+    if (!checkPassword(newPassword)) {
+        return alert("비밀번호는 영문과 숫자 조합으로 8 ~ 16자리 가능.")
     }
+
+    if (newPassword !== newPasswordCheck) {
+        return alert("새 비밀번호가 서로 동일하지 않습니다.")
+    }
+
+    $.ajax({
+        type : "PUT",
+        url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
+        contentType: "application/json",
+        data: JSON.stringify({
+            nowPassword : presentPassword,
+            newPassword : newPassword,
+            userProfileIntro : newProfileText
+        }),
+        success: function () {
+            alert("변경되었습니다.")
+            $('#profile-change-modal').modal('hide');
+            location.reload();
+        },
+        error: function (request) {
+            if (request.status === 401) {
+                alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
+            } else {
+                alert(`에러가 발생했습니다.\n변경 사항은 저장되지 않았습니다.\nError Code: ${request.status}`)
+            }
+        }
+    })
 }
 
 // 자신이 작성한 글 보기

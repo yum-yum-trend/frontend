@@ -26,6 +26,17 @@
     <title>Yum Yum Trend</title>
 </head>
 <script>
+    $(document).ready(function () {
+        checkLocalStorage()
+    })
+
+    // localStorage 에 token, username, userId가 모두 있으면 index.html로 이동
+    function checkLocalStorage() {
+        if (localStorage.getItem("token") && localStorage.getItem("username") && localStorage.getItem("userId")) {
+            location.href = 'index.html'
+        }
+    }
+
     /* 애플리케이션 로그인 */
     function login() {
         let info = {
@@ -42,6 +53,13 @@
                 localStorage.setItem("username", response['username']);
                 localStorage.setItem("userId", response['id']);
                 location.href = 'index.html';
+            },
+            error: function (request) {
+                if (request.status === 401) {
+                    alert("사용자 이름과 비밀번호를 정확히 입력해주세요.")
+                } else {
+                    alert(`에러가 발생했습니다.\nError Code: ${request.status}`)
+                }
             }
         })
     }
