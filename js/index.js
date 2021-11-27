@@ -4,6 +4,17 @@ let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
+$(document).ready(function () {
+    checkLoginStatus();
+})
+
+// localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
+function checkLoginStatus() {
+    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
+        location.href = 'login.html'
+    }
+}
+
 function registerEventListener() {
     // 해시태그 입력 리스너
     $("#hashtag-input").keydown(function(e) {
@@ -249,6 +260,7 @@ function makeArticleContents(article) {
     })
 }
 
+// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
     $.ajax({
         type: "GET",
@@ -256,7 +268,12 @@ function showNavbarProfileImage(userId) {
         data : {},
         success : function (response) {
             let temphtml = `<div class="nav-item nav-link" >
-                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" onclick="location.href='profile.html?userId=${userId}'">
+                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
+                                  </div>
                             </div>`
             $('#nav-user-profile-button').append(temphtml)
 
@@ -269,3 +286,10 @@ function showNavbarProfileImage(userId) {
     })
 }
 
+// 로그아웃 (로그인 페이지로 이동)
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    location.href = 'login.html';
+}

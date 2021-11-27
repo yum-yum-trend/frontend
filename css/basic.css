@@ -141,6 +141,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .gps-setting {
     margin-bottom: 5px;
+}
+
+.dropdown-item {
+    text-align: center;
 }
