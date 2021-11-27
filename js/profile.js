@@ -1,5 +1,4 @@
 const gUserId = localStorage.getItem('userId')
-const gUsername = localStorage.getItem('username')
 const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.location.href)[1]
 const gIsMyPage = (gUserId === gProfileUserId);
 
@@ -8,8 +7,6 @@ $(document).ready(function () {
     $('#header').load("header.html");
     $('#list').load("list.html");
     $('#article-modal').load("article-modal.html");
-    $("#article-list").hide();
-    $("#comment-list").hide();
     showNavbarProfileImage(gUserId);
     showMyPageSettings()
     showUserProfileInfo(gProfileUserId)
@@ -103,8 +100,8 @@ function resetProfileImage(userId) {
     let response = confirm("프로필 사진을 초기화 하시겠습니까?");
     if (response) {
         $.ajax({
-            type: "GET",
-            url: `${WEB_SERVER_DOMAIN}/profile/image-reset/${userId}`,
+            type: "DELETE",
+            url: `${WEB_SERVER_DOMAIN}/profile/${userId}`,
             data: {},
             success: function () {
                 alert("프로필 사진이 초기화 되었습니다.");
@@ -134,8 +131,8 @@ function updateUserProfileInfo(userId) {
         alert("새 비밀번호가 서로 동일하지 않습니다.")
     } else {
         $.ajax({
-            type : "POST",
-            url : `${WEB_SERVER_DOMAIN}/profile/update/${userId}`,
+            type : "PUT",
+            url : `${WEB_SERVER_DOMAIN}/profile/${userId}`,
             contentType: "application/json",
             data: JSON.stringify({
                 nowPassword : presentPassword,
@@ -162,9 +159,7 @@ function updateUserProfileInfo(userId) {
 function showUserArticles(userId) {
     $("#article-list").empty();
     $("#articles-division").addClass("active");
-    $("#comments-division").removeClass("active");
-    $("#comment-list").hide();
-    $("#article-list").show();
+    $("#bookmarks-division").removeClass("active");
 
     $.ajax({
         type : "GET",
@@ -181,9 +176,6 @@ function showUserBookmarks(userId) {
     $("#article-list").empty();
     $("#articles-division").removeClass("active");
     $("#bookmarks-division").addClass("active");
-    $("#comments-division").removeClass("active");
-    $("#comment-list").hide();
-    $("#article-list").show();
 
     $.ajax({
         type : "GET",
@@ -193,27 +185,4 @@ function showUserBookmarks(userId) {
             makeArticles(response);
         }
     })
-}
-
-// 자신이 작성한 코멘트 보기
-function showUserComments(userId) {
-    $("#comment-list").empty();
-    $("#articles-division").removeClass("active");
-    $("#bookmarks-division").removeClass("active");
-    $("#comments-division").addClass("active");
-    $("#article-list").hide();
-    $("#comment-list").show();
-
-    $.ajax({
-        type : "GET",
-        url : `${WEB_SERVER_DOMAIN}/profile/comments/${userId}`,
-        data : {},
-        success : function (response) {
-            makeComments(response);
-        }
-    })
-}
-
-function makeComments(response) {
-    // 댓글 기능 완성 후 작성 예정
 }
