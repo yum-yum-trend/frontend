@@ -1,11 +1,19 @@
 const MAX_IMAGE_UPLOAD = 10;
 
-let hashtagNameList = [];
+let tagNames = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
 let gArticle;
 
+$(document).ready(function () {
+    console.log("ready")
+    $('#header').load("header.html");
+    $('#list').load("list.html");
+    $('#modal').load("article-modal.html");
+
+    showArticles();
+});
 
 /* 사용자 구별 */
 function isMe(userId) {
@@ -15,32 +23,32 @@ function isMe(userId) {
 /* 리스너 등록 함수 */
 function registerEventListener() {
     // 해시태그 입력 리스너
-    $("#hashtag-input").keydown(function(e) {
+    $("#tag-input").keydown(function(e) {
          // 엔터키 입력 체크
         if (e.keyCode == 13) {
-            let hashtag = $('#hashtag-input').val();
-            if(hashtag == '' || hashtag == '#') {
+            let tag = $('#tag-input').val();
+            if(tag == '' || tag == '#') {
                 return;
             }
 
-            if(!hashtag.charAt(0) != '#') {
-                hashtag = '#' + hashtag;
+            if(!tag.charAt(0) != '#') {
+                tag = '#' + tag;
             }
 
-            if(hashtagNameList.includes(hashtag)) {
+            if(tagNames.includes(tag)) {
                 alert("이미 입력한 해시태그입니다.");
-                $('#hashtag-input').val('');
+                $('#tag-input').val('');
                 return;
             }
 
-            hashtagNameList.push(hashtag);
+            tagNames.push(tag);
 
-            let tmpSpan = `<span class="hashtag" 
+            let tmpSpan = `<span class="tag" 
                                  style="background-color: ${createRandomColor()}" 
-                                 onclick="removeHashtag(this, '${hashtag}')">${hashtag}</span>`;
-            $('#hashtag-list').append(tmpSpan);
+                                 onclick="removeTag(this, '${tag}')">${tag}</span>`;
+            $('#tag-list').append(tmpSpan);
 
-            $('#hashtag-input').val('');
+            $('#tag-input').val('');
         }
     });
 
@@ -84,7 +92,7 @@ function registerEventListener() {
     $('#article-modal').on('hidden.bs.modal', function (e) {
         console.log("modal close");
         // 이전에 입력되었던 내용 삭제
-        hashtagNameList = [];
+        tagNames = [];
         imageFileDict = {};
         imageFileDictKey = 0;
         deleteSelectLocation();
@@ -105,7 +113,7 @@ function articleModalToggle(action) {
             $('#add-article-btn').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
-            $('#article-hashtag-input-div').show();
+            $('#article-tag-input-div').show();
             $('#article-textarea').show();
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
@@ -128,7 +136,7 @@ function articleModalToggle(action) {
             $('#article-textarea').hide();
             $('#article-image-form').hide();
             $('#article-location-input-div').hide();
-            $('#article-hashtag-input-div').hide();
+            $('#article-tag-input-div').hide();
             $('#user-gps-setting').hide();
             $('#article-location-list-div').hide();
             $('#pagination').hide();
@@ -142,7 +150,7 @@ function articleModalToggle(action) {
             $('#article-textarea').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
-            $('#article-hashtag-input-div').show();
+            $('#article-tag-input-div').show();
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
             $('#pagination').show();
@@ -158,10 +166,10 @@ function createRandomColor() {
         (85 + 10 * Math.random()) + '%)'
 }
 
-function removeHashtag(span, rmHashtag) {
-    for(let i = 0; i < hashtagNameList.length; i++) {
-        if(hashtagNameList[i] == rmHashtag) {
-            hashtagNameList.splice(i, 1);
+function removeTag(span, rmTag) {
+    for(let i = 0; i < tagNames.length; i++) {
+        if(tagNames[i] == rmTag) {
+            tagNames.splice(i, 1);
             break;
         }
     }
@@ -178,10 +186,10 @@ function addArticle() {
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
     formData.append("location", locationJsonString);
-    formData.append("hashtagNameList", hashtagNameList);
+    formData.append("tagNames", tagNames);
 
     Object.keys(imageFileDict).forEach(function (key) {
-        formData.append("imageFileList", imageFileDict[key]);
+        formData.append("imageFiles", imageFileDict[key]);
     });
 
     $.ajax({
@@ -225,7 +233,7 @@ function makeArticles(articles) {
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" onclick="getArticle(${article.id})" style="display: inline-block;">
-                                <img class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
+                                <img class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
                                 <div class="card-body">
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 / 좋아요 수 / 댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
@@ -269,16 +277,16 @@ function makeArticleContents(action) {
         }
         $('#article-location-div').append(tmpHtml);
 
-        gArticle.imageList.forEach(function (image) {
+        gArticle.images.forEach(function (image) {
             let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                             <img src="${image.url}" class="article-image"/>
                        </div>`
             $('#image-list').append(tmpHtml);
         })
 
-        gArticle.hashtagList.forEach(function (hashtag) {
-            let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
-            $('#hashtag-list').append(tmpSpan)
+        gArticle.tags.forEach(function (tag) {
+            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}">${tag.name}</span>`;
+            $('#tag-list').append(tmpSpan)
         })
 
         // 게시물 작성자와 사용자 구별
@@ -298,15 +306,15 @@ function makeArticleContents(action) {
             "categoryName": gLocationInfo.categoryName
         }
 
-        gArticle.hashtagList.forEach(function (hashtag) {
-            hashtagNameList.push(hashtag.tag);
+        gArticle.tags.forEach(function (tag) {
+            tagNames.push(tag.name);
         })
 
         console.log("[update] gLocationInfo   = " + gLocationInfo);
-        console.log("[update] hashtagNameList = " + hashtagNameList);
+        console.log("[update] tagNames = " + tagNames);
 
         $('#article-username').text(gArticle.user.username);
-        $('#article-textarea').text(gArticle.text);
+        $('#article-textarea').val(gArticle.text);
 
         <!-- 위치 정보 표시 -->
         let tmpHtml = ``
@@ -319,7 +327,7 @@ function makeArticleContents(action) {
         }
         $('#article-location-div').append(tmpHtml);
 
-        gArticle.imageList.forEach(function (image) {
+        gArticle.images.forEach(function (image) {
             let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                                 <img src="${image.url}" class="article-image"/>
                                  <div class="article-image-container-middle" onclick="deleteImage(${image.id})">
@@ -329,10 +337,10 @@ function makeArticleContents(action) {
             $('#image-list').append(tmpHtml);
         })
 
-        gArticle.hashtagList.forEach(function (hashtag) {
-            let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}"  
-                                 onclick="removeHashtag(this, '${hashtag.tag}')">${hashtag.tag}</span>`;
-            $('#hashtag-list').append(tmpSpan)
+        gArticle.tags.forEach(function (tag) {
+            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}"  
+                                 onclick="removeTag(this, '${tag.name}')">${tag.name}</span>`;
+            $('#tag-list').append(tmpSpan)
         })
 
         $('#update-article-btn').html('게시하기');
@@ -346,10 +354,10 @@ function updateArticle(id) {
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
     formData.append("location", locationJsonString);
-    formData.append("hashtagNameList", hashtagNameList);
+    formData.append("tagNames", tagNames);
 
     Object.keys(imageFileDict).forEach(function (key) {
-        formData.append("imageFileList", imageFileDict[key]);
+        formData.append("imageFiles", imageFileDict[key]);
     });
 
     $.ajax({
@@ -375,5 +383,3 @@ function updateArticle(id) {
 function deleteImage(id) {
 
 }
-
-
