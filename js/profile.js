@@ -3,17 +3,6 @@ const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.lo
 const gIsMyPage = (gUserId === gProfileUserId);
 
 
-$(document).ready(function () {
-    $('#header').load("header.html");
-    $('#list').load("list.html");
-    $('#article-modal').load("article-modal.html");
-    checkLoginStatus();
-    showNavbarProfileImage(gUserId);
-    showMyPageSettings()
-    showUserProfileInfo(gProfileUserId)
-    showUserArticles(gProfileUserId)
-})
-
 // localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
 function checkLoginStatus() {
     if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
@@ -185,6 +174,21 @@ function showUserArticles(userId) {
         data : {},
         success : function (response) {
             makeArticles(response);
+            showUserLikes(userId)
+        }
+    })
+}
+
+/* 모든 좋아요 정보 조회 */
+function showUserLikes(userId) {
+    $.ajax({
+        type: 'GET',
+        url: `${WEB_SERVER_DOMAIN}/profile/likes/${userId}`,
+        success: function (response) {
+            makeLikes(response);
+        },
+        fail: function (err) {
+            alert("fail");
         }
     })
 }

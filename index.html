@@ -40,22 +40,20 @@
 </head>
 <script>
     const gUserId = localStorage.getItem('userId')
+
     $(document).ready(function () {
         $('#header').load("header.html");
         $('#list').load("list.html");
         $('#modal').load("article-modal.html");
+
         showNavbarProfileImage(gUserId);
         showArticles();
+        showLikes();
     });
-
 </script>
 <body>
     <header id="header"></header>
     <section id="list"></section>
     <section id="modal"></section>
 </body>
-<script>
-    modalEventListener()
-</script>
-
 </html>

@@ -36,10 +36,10 @@
                             <!-- 게시글 상세보기 -->
                             <div id="article-text-div" class="modal-dynamic-contents" style="display: none;"></div>
                         </div>
-                        <!-- 댓글 내용 TODO: 게시글과 댓글 스크롤 만들기 -->
                         <div id="article-comment-div">
 
                         </div>
+
                     </div>
 
                     <div>
@@ -53,23 +53,25 @@
                                     <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
                                 </div>
                             </div>
-                            <div id="article-location-div" >
+                            <div id="article-location-div" class="modal-dynamic-contents">
                             </div>
-                            <div id="article-location-list-div">
+                            <div id="article-location-list-div" class="modal-dynamic-contents">
                             </div>
-                            <ul class="pagination" style="justify-content: center; " id="pagination">
+                            <ul class="pagination" style="justify-content: center; " id="pagination" class="modal-dynamic-contents">
                             </ul>
                         </div>
 
                         <!-- 해시 태그 -->
                         <i class="fa fa-hashtag article-content-icon" aria-hidden="true"></i> 해시태그
-                        <div class="input-group mb-3" id="article-hashtag-input-div">
-                            <input type="text" id="hashtag-input" class="form-control" placeholder="해시태그">
+                        <div class="input-group mb-3" id="article-tag-input-div">
+                            <input type="text" id="tag-input" class="form-control" placeholder="해시태그">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fa fa-plus" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        <div id="hashtag-list" class="modal-dynamic-contents">
+
+                        <div id="tag-list" class="modal-dynamic-contents">
+                            <!-- 입력한 해시태그 출력 -->
                         </div>
 
                         <!-- 좋아요 & 좋아요 수 출력 -->
@@ -79,15 +81,32 @@
                         <!-- 댓글 입력창 -->
                         <div class="input-group" id="article-comment-input-div">
                             <input type="text" class="form-control" id="article-comment-input-box" placeholder="댓글..." aria-label="" aria-describedby="">
-                            <div class="input-group-append" id="article-comment-input-button-div">
+                            <div class="input-group-append modal-dynamic-contents" id="article-comment-input-button-div">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="add-article-btn" type="button" class="btn btn-primary" onclick="addArticle()">게시하기
+                <button id="article-add-btn" type="button" class="btn btn-primary" onclick="addArticle()">
+                    게시하기
                 </button>
+                <button id="article-delete-btn" type="button" class="btn btn-danger"
+                        onclick="" style="display: none;">
+                    삭제하기
+                </button>
+                <button id="article-update-btn" type="button" class="btn btn-primary"
+                        onclick="" style="display: none;">
+                    수정하기
+                </button>
+            </div>
+            <div id="modal-load" style="display: none;">
+                <div id="modal-load-img-div">
+                    <img src="/images/loading-icon.gif" alt="로딩 이미지" width="32" height="11"/>
+                </div>
+                <div id="modal-load-msg-div">
+
+                </div>
             </div>
         </div>
     </div>
@@ -95,5 +114,4 @@
 <script>
     registerEventListener();
     locationRegisterEventListener();
-    modalEventListener();
 </script>

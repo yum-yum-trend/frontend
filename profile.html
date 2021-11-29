@@ -11,6 +11,10 @@
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
           crossorigin="anonymous">
 
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+          integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
@@ -36,10 +40,18 @@
 
     <title>Yum Yum Trend</title>
 </head>
-
 <script>
+    $(document).ready(function () {
+        $('#header').load("header.html");
+        $('#list').load("list.html");
+        $('#modal').load("article-modal.html");
+        checkLoginStatus();
+        showNavbarProfileImage(gUserId);
+        showMyPageSettings()
+        showUserProfileInfo(gProfileUserId)
+        showUserArticles(gProfileUserId)
+    })
 </script>
-
 <body>
 <!-- Header -->
 <header id="header"></header>
@@ -116,6 +128,6 @@
 
 <!-- profile content division -->
 <section id="list"></section>
-<section id="article-modal"></section>
+<section id="modal"></section>
 </body>
 </html>
