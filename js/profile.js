@@ -67,7 +67,7 @@ function updateUserProfileImage(newProfileImage) {
             location.reload();
         },
         error: function (request) {
-            alert(`에러가 발생했습니다.\n변경 사항은 저장되지 않았습니다.\nError Code: ${request.status}`)
+            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
         }
     })
 }
@@ -167,7 +167,7 @@ function updateUserProfileInfo(userId) {
             if (request.status === 401) {
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
-                alert(`에러가 발생했습니다.\n변경 사항은 저장되지 않았습니다.\nError Code: ${request.status}`)
+                alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
             }
         }
     })

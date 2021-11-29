@@ -5,6 +5,48 @@ let hashtagNameList = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 
+// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
+function showNavbarProfileImage(userId) {
+    $.ajax({
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
+        data : {},
+        success : function (response) {
+            let tempHtml = `<div class="nav-item nav-link" >
+                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
+                                  </div>
+                            </div>`
+            $('#nav-user-profile-button').append(tempHtml)
+
+            if (response) {
+                $("#nav-user-profile-image").attr("src", response);
+            } else {
+                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+            }
+        },
+        error: function (request) {
+            if (request.status === 401) {
+                let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
+                $('#nav-user-profile-button').append(tempHtml)
+            } else {
+                alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+            }
+        }
+    })
+}
+
+// 로그아웃 (로그인 페이지로 이동)
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    location.reload();
+}
+
 function registerEventListener() {
     // 해시태그 입력 리스너
     $("#hashtag-input").keydown(function (e) {
@@ -91,6 +133,7 @@ function articleModalToggle(action) {
         case "add":
             $('#article-text-div').hide();
             $('#article-like-count').hide();
+            $('#article-comment-input-div').hide();
             $('#add-article-btn').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
@@ -122,6 +165,7 @@ function articleModalToggle(action) {
             $('#pagination').hide();
             $('#article-text-div').show();
             $('#article-like-count').show();
+            $('#article-comment-input-div').show();
 
             break;
     }
@@ -198,6 +242,7 @@ function showArticles() {
 }
 
 function makeArticles(articles) {
+    console.log(articles)
     $('#article-list').empty();
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
@@ -279,6 +324,7 @@ function getArticle(id) {
         success: function (response) {
             console.log(response)
             makeArticleContents(response);
+            showArticleComments(id)
         },
         fail: function (err) {
             alert("fail");
@@ -326,6 +372,11 @@ function makeArticleContents(article) {
         let tempHtml = `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(article.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
+
+    // 댓글 버튼
+    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" onclick="postComment(${article.article.id})">게시하기</button>`
+    $('#article-comment-input-button-div').append(tempHtml);
+
 }
 
 // 좋아요 수 편집 (K로 나타내기)
@@ -342,42 +393,61 @@ function num2str(likesCount) {
     return likesCount
 }
 
-// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
-function showNavbarProfileImage(userId) {
-    if (userId) {
-        $.ajax({
-            type: "GET",
-            url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
-            data : {},
-            success : function (response) {
-                let tempHtml = `<div class="nav-item nav-link" >
-                                    <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                      <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
-                                      </div>
+// 게시물 상세보기 - 댓글
+function showArticleComments(articleId) {
+    $.ajax({
+        type : "GET",
+        url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+        success : function(response) {
+            for (let i = 0; i < response.length; i++){
+                let imgSrc = response[i].userProfileImageUrl ? response[i].userProfileImageUrl : "/images/profile_placeholder.png";
+                let tempHtml = `<div class="comment-box">
+                                    <div class="comment">
+                                        <img class="comment-user-profile-image for-cursor" src="${imgSrc}" onclick="location.href='profile.html?userId=${response[i].userId}'">
+                                        <a class="comment-username">${response[i].username}</a>
+                                        <a class="comment-text">${response[i].commentText}</a>
+                                    </div>
                                 </div>`
-                $('#nav-user-profile-button').append(tempHtml)
-
-                if (response) {
-                    $("#nav-user-profile-image").attr("src", response);
-                } else {
-                    $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+                if (gUserId === response[i].userId) {
+                    tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
                 }
+                $('#article-comment-div').append(tempHtml)
+            }
+        },
+        error: function (request) {
+            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+        }
+    })
+}
+
+// 댓글 입력
+function postComment(articleId) {
+    let commentText = $('#article-comment-input-box').val();
+
+    if (!commentText) {
+        alert("댓글 내용을 입력해주세요.")
+    } else {
+        $.ajax({
+            type : "POST",
+            url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+            contentType: "application/json",
+            data: JSON.stringify({
+                commentText : commentText
+            }),
+            success : function () {
+                console.log("posting comment success")
             }
         })
-    } else {
-        // FIXME : 버튼이 화면에 출력이 안 돼요 ㅠㅠㅠ 로그인 안 한 상태로 index.html 진입 시 보이게 좀 도와주세요
-        let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
-        $('#nav-user-profile-button').append(tempHtml)
     }
 }
 
-// 로그아웃 (로그인 페이지로 이동)
-function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("userId");
-    location.reload();
+// 댓글 삭제
+function deleteComment(commentId) {
+    $.ajax({
+        type: "DELETE",
+        url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
+        success : function () {
+            alert("삭제 완료")
+        }
+    })
 }

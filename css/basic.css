@@ -65,6 +65,8 @@
     width: 40%;
     height: 600px;
     float: right;
+    display: grid;
+    align-content: space-between;
 }
 
 #article-user-profile-img {
@@ -74,6 +76,7 @@
 
 #article-username {
     margin-left: 10px;
+    font-weight: bolder;
 }
 
 #article-textarea {
@@ -84,6 +87,10 @@
     border: none;
     outline: none;
     resize: none;
+}
+
+#article-text-div {
+    margin-top : 10px;
 }
 
 #article-location-div {
@@ -148,4 +155,43 @@
 
 .dropdown-item {
     text-align: center;
+}
+
+#article-comment-div {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+.comment {
+    display: flex;
+    margin-top : 10px;
+}
+
+.comment-user-profile-image{
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    float: left;
+}
+
+.comment-username {
+    font-weight: bolder;
+    margin-left : 5px;
+    margin-right : 10px;
+}
+
+.comment-text {
+    word-break:break-all;
+    font-weight: lighter;
+}
+
+.x {
+    float: right;
+    margin-left : 5px;
 }
