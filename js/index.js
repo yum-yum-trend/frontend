@@ -39,6 +39,7 @@ function loadingPageToggle(action, msg) {
 
 /* 리스너 등록 함수 */
 function registerEventListener() {
+    console.log("event resgister listener");
     // 해시태그 입력 리스너
     $("#tag-input").keydown(function(e) {
          // 엔터키 입력 체크
@@ -279,7 +280,7 @@ function makeArticles(articles) {
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
-                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
+                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
                                     <span id="card-like-${article.id}"></span>
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
@@ -389,6 +390,7 @@ function getArticle(id) {
 
 /* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
+    $('.modal-dynamic-contents').empty();
     if (action == "get") {
         $('#article-username').text(gArticle.user.username);
         $('#article-text-div').text(gArticle.text);

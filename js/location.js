@@ -6,6 +6,7 @@ const KAKAO_LOCATION_SIZE = 5;
 
 // 위치정보 입력 리스너
 function locationRegisterEventListener() {
+    console.log("location register listener ");
     $('#search-input').on('keypress', function (e) {
         if (e.key == 'Enter') {
             getLocation(1);

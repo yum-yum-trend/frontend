@@ -1,4 +1,3 @@
-const gUserId = localStorage.getItem('userId')
 const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.location.href)[1]
 const gIsMyPage = (gUserId === gProfileUserId);
 
