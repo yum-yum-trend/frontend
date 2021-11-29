@@ -49,6 +49,7 @@
             contentType: "application/json",
             data: JSON.stringify(info),
             success: function (response) {
+                console.log(response);
                 localStorage.setItem("token", response['token']);
                 localStorage.setItem("username", response['username']);
                 localStorage.setItem("userId", response['id']);

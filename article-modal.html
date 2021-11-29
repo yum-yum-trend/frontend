@@ -43,24 +43,24 @@
                                 <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        <div id="article-location-div" >
+                        <div id="article-location-div" class="modal-dynamic-contents">
                             <!-- <div id="article-location-div" class="modal-dynamic-contents"> -->
                         </div>
-                        <div id="article-location-list-div">
+                        <div id="article-location-list-div" class="modal-dynamic-contents">
 
                         </div>
-                        <ul class="pagination" style="justify-content: center; " id="pagination">
+                        <ul class="pagination" style="justify-content: center; " id="pagination" class="modal-dynamic-contents">
                         </ul>
                     </div>
                     <div>
                         <i class="fa fa-hashtag article-content-icon" aria-hidden="true"></i> 해시태그
-                        <div class="input-group mb-3" id="article-hashtag-input-div">
-                            <input type="text" id="hashtag-input" class="form-control" placeholder="해시태그">
+                        <div class="input-group mb-3" id="article-tag-input-div">
+                            <input type="text" id="tag-input" class="form-control" placeholder="해시태그">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fa fa-plus" aria-hidden="true"></i></span>
                             </div>
                         </div>
-                        <div id="hashtag-list" class="modal-dynamic-contents">
+                        <div id="tag-list" class="modal-dynamic-contents">
                             <!-- 입력한 해시태그 출력 -->
                         </div>
                         <div id="article-like-count">
@@ -70,8 +70,25 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button기 id="add-article-btn" type="button" class="btn btn-primary" onclick="addArticle()">게시하기
-                </button기>
+                <button id="article-add-btn" type="button" class="btn btn-primary" onclick="addArticle()">
+                    게시하기
+                </button>
+                <button id="article-delete-btn" type="button" class="btn btn-danger"
+                        onclick="" style="display: none;">
+                    삭제하기
+                </button>
+                <button id="article-update-btn" type="button" class="btn btn-primary"
+                        onclick="" style="display: none;">
+                    수정하기
+                </button>
+            </div>
+            <div id="modal-load" style="display: none;">
+                <div id="modal-load-img-div">
+                    <img src="/images/loading-icon.gif" alt="로딩 이미지" width="32" height="11"/>
+                </div>
+                <div id="modal-load-msg-div">
+
+                </div>
             </div>
         </div>
     </div>
