@@ -25,21 +25,6 @@ function showMyPageSettings() {
 }
 
 
-// 프로필 이미지 클릭 시 업로드 창 띄우기
-$(function() {
-    $('#user-profile-image').click(function () {
-        $("input[name='imageFile']").click();
-    })
-
-    $('#imageFile').on('change', function (e) {
-        e.preventDefault();
-        var newProfileImage = e.target.files[0];
-
-        updateUserProfileImage(newProfileImage);
-    })
-})
-
-
 // 변경할 프로필 이미지 업로드
 function updateUserProfileImage(newProfileImage) {
     var formData = new FormData();

@@ -45,9 +45,24 @@
         $('#header').load("header.html");
         $('#list').load("list.html");
         $('#modal').load("article-modal.html");
+
+        // 프로필 이미지 클릭 시 업로드 창 띄우기
+        $(function() {
+            $('#user-profile-image').click(function () {
+                $("input[name='imageFile']").click();
+            })
+
+            $('#imageFile').on('change', function (e) {
+                e.preventDefault();
+                var newProfileImage = e.target.files[0];
+
+                updateUserProfileImage(newProfileImage);
+            })
+        })
+
         checkLoginStatus();
         showNavbarProfileImage(gUserId);
-        showMyPageSettings()
+        showMyPageSettings();
         showUserProfileInfo(gProfileUserId)
         showUserArticles(gProfileUserId)
     })
