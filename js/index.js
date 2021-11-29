@@ -7,17 +7,49 @@ let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
 
 let gArticle;
-const gUserId = localStorage.getItem('userId')
 
-$(document).ready(function () {
-    $('#header').load("header.html");
-    $('#list').load("list.html");
-    $('#modal').load("article-modal.html");
 
-    showNavbarProfileImage(gUserId);
-    showArticles();
-    showLikes();
-});
+// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
+function showNavbarProfileImage(userId) {
+    $.ajax({
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
+        data : {},
+        success : function (response) {
+            let tempHtml = `<div class="nav-item nav-link" >
+                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
+                                  </div>
+                            </div>`
+            $('#nav-user-profile-button').append(tempHtml)
+
+            if (response) {
+                $("#nav-user-profile-image").attr("src", response);
+            } else {
+                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+            }
+        },
+        error: function (request) {
+            if (request.status === 401) {
+                let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
+                $('#nav-user-profile-button').append(tempHtml)
+            } else {
+                alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+            }
+        }
+    })
+}
+
+// 로그아웃 (로그인 페이지로 이동)
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    location.reload();
+}
 
 /* 사용자 구별 */
 function isMe(userId) {
@@ -140,6 +172,7 @@ function articleModalToggle(action) {
             $('#article-delete-btn').hide();
             $('#article-add-btn').show();
             $('#article-like-count').hide();
+            $('#article-comment-input-div').hide();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
             $('#article-tag-input-div').show();
@@ -171,6 +204,8 @@ function articleModalToggle(action) {
             $('#pagination').hide();
             $('#article-text-div').show();
             $('#article-like-count').show();
+            $('#article-comment-input-div').show();
+            $('#article-like-count').show()
 
             $('#article-modal').modal({backdrop: false, keyboard: false, show: true});
             break;
@@ -178,6 +213,9 @@ function articleModalToggle(action) {
         case "update":
             $('#article-add-btn').hide();
             $('#article-delete-btn').hide();
+            $('#article-text-div').hide();
+            $('#article-comment-input-div').hide();
+            $('#article-like-count').hide();
             $('#article-textarea').show();
             $('#article-image-form').show();
             $('#article-location-input-div').show();
@@ -185,7 +223,6 @@ function articleModalToggle(action) {
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
             $('#pagination').show();
-            $('#article-text-div').hide();
 
             $('.modal-dynamic-contents').empty();
     }
@@ -269,13 +306,14 @@ function showArticles() {
         success: function (response) {
             makeArticles(response);
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (request) {
+            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
         }
     })
 }
 
 function makeArticles(articles) {
+    console.log(articles)
     $('#article-list').empty();
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
@@ -380,7 +418,8 @@ function getArticle(id) {
             gArticle = response;
             articleModalToggle("get");
             makeArticleContents("get");
-            getLike(id)
+            getLike(id);
+            showArticleComments(id)
         },
         fail: function (err) {
             alert("fail");
@@ -585,6 +624,10 @@ function makeArticleContentsByLike(likeInfo) {
         let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
+
+    // 댓글 버튼
+    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${likeInfo.article.id}" onclick="postComment(${likeInfo.article.id})">게시하기</button>`
+    $('#article-comment-input-button-div').append(tempHtml);
 }
 
 
@@ -602,36 +645,71 @@ function num2str(likesCount) {
     return likesCount
 }
 
-// 오른쪽 상단 프로필 사진&드롭다운 동적 생성
-function showNavbarProfileImage(userId) {
+// 게시물 상세보기 - 댓글
+function showArticleComments(articleId) {
     $.ajax({
-        type: "GET",
-        url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
-        data: {},
-        success: function (response) {
-            let temphtml = `<div class="nav-item nav-link" >
-                                <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                  <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="profile.html?userId=${userId}">프로필</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item for-cursor" onclick="logout()">로그아웃</a>
-                                  </div>
-                            </div>`
-            $('#nav-user-profile-button').append(temphtml)
+        type : "GET",
+        url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+        success : function(response) {
+            for (let i = 0; i < response.length; i++){
+                let imgSrc = response[i].userProfileImageUrl ? response[i].userProfileImageUrl : "/images/profile_placeholder.png";
+                let tempHtml = `<div class="comment-box modal-dynamic-contents" id="comment-box-${response[i].commentId}">
+                                    <div class="comment">
+                                        <img class="comment-user-profile-image for-cursor" src="${imgSrc}" onclick="location.href='profile.html?userId=${response[i].userId}'">
+                                        <a class="comment-username">${response[i].username}</a>
+                                        <a class="comment-text">${response[i].commentText}</a>
+                                    </div>`
 
-            if (response) {
-                $("#nav-user-profile-image").attr("src", response);
-            } else {
-                $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
+                if (gUserId === `${response[i].userId}`) {
+                    tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
+                }
+                tempHtml += `</div>`
+                $('#article-comment-div').append(tempHtml)
             }
+        },
+        error: function (request) {
+            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
         }
     })
 }
 
-// 로그아웃 (로그인 페이지로 이동)
-function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("userId");
-    location.href = 'login.html';
+// 댓글 입력
+function postComment(articleId) {
+    let token = localStorage.getItem('token');
+    let commentText = $('#article-comment-input-box').val();
+
+    if (!token) {
+        return alert("로그인이 필요합니다.")
+    } else if (!commentText) {
+        alert("댓글 내용을 입력해주세요.")
+    } else {
+        $.ajax({
+            type : "POST",
+            url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+            contentType: "application/json",
+            data: JSON.stringify({
+                commentText : commentText
+            }),
+            success : function () {
+                $('#article-comment-div').empty();
+                showArticleComments(articleId);
+                $('#article-comment-input-box').val('');
+                console.log("posting comment success")
+            }
+        })
+    }
+}
+
+// 댓글 삭제
+function deleteComment(commentId) {
+    if (confirm("댓글을 삭제하시겠습니까?")) {
+        $.ajax({
+            type: "DELETE",
+            url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
+            success : function () {
+                $(`#comment-box-${commentId}`).remove();
+            }
+        })
+    }
+
 }
