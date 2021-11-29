@@ -20,6 +20,19 @@ function isMe(userId) {
     return (localStorage.getItem("userId") == userId);
 }
 
+function loadingPageToggle(action, msg) {
+    switch (action) {
+        case "show":
+            $('#modal-load').show();
+            $('#modal-load-msg-div').append(`<div>${msg}</div>`);
+            break;
+        case "hide":
+            $('#modal-load-msg-div').empty();
+            $('#modal-load').hide();
+            break;
+    }
+}
+
 /* 리스너 등록 함수 */
 function registerEventListener() {
     // 해시태그 입력 리스너
@@ -79,13 +92,11 @@ function registerEventListener() {
                 let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
                                 <img src="${e.target.result}" data-file=${file.name} 
                                          class="article-image"/>
-                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey})">
+                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
                 $('#image-list').append(tmpHtml);
-
-                imageFileDictKey++;
             };
             reader.readAsDataURL(file);
         });
@@ -130,7 +141,7 @@ function articleModalToggle(action) {
             $('#article-username').text(localStorage.getItem("username"));
             // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
 
-            $('#article-modal').modal('show');
+            $('#article-modal').modal({backdrop: false, keyboard: false, show: true});
             break;
         // 게시글 상세보기
         case "get":
@@ -146,7 +157,7 @@ function articleModalToggle(action) {
             $('#pagination').hide();
             $('#article-text-div').show();
 
-            $('#article-modal').modal('show');
+            $('#article-modal').modal({backdrop: false, keyboard: false, show: true});
             break;
         // 게시글 업데이트
         case "update":
@@ -200,6 +211,8 @@ function checkArticleImagesInput() {
 function addArticle() {
     if(!checkArticleImagesInput()) return;
 
+    loadingPageToggle("show", "게시물을 등록 중입니다.");
+
     let formData = new FormData();
     let locationJsonString = JSON.stringify(gLocationInfo)
     formData.append("text", $('#article-textarea').val());
@@ -219,10 +232,11 @@ function addArticle() {
         processData: false,
         data: formData,
         success: function (response) {
-            // TODO: 서버로부터 결과값 받기
             alert("게시물이 성공적으로 등록됐습니다.");
 
+            loadingPageToggle("hide");
             $('#article-modal').modal('hide');
+
             showArticles();
         },
         fail: function (err) {
@@ -298,7 +312,7 @@ function makeArticleContents(action) {
         gArticle.images.forEach(function (image) {
             let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                             <img src="${image.url}" class="article-image"/>
-                       </div>`
+                           </div>`
             $('#image-list').append(tmpHtml);
         })
 
@@ -374,7 +388,7 @@ function makeArticleContents(action) {
 function updateArticle(id) {
     if(!checkArticleImagesInput()) return;
 
-    // TODO: Loading page enable
+    loadingPageToggle("show", "게시물을 수정 중입니다.");
 
     let formData = new FormData();
     let locationJsonString = JSON.stringify(gLocationInfo)
@@ -396,11 +410,11 @@ function updateArticle(id) {
         processData: false,
         data: formData,
         success: function (response) {
-            // TODO: Loading page disable
-
             alert("게시물이 성공적으로 수정됐습니다.");
 
+            loadingPageToggle("hide");
             $('#article-modal').modal('hide');
+
             showArticles();
         },
         fail: function (err) {
@@ -411,16 +425,18 @@ function updateArticle(id) {
 
 /* 게시물 삭제 */
 function deleteArticle(id) {
-    // TODO: Loading page enable
+    loadingPageToggle("show", "게시물을 삭제 중입니다.");
+
     $.ajax({
         type: 'DELETE',
         url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
         enctype: 'multipart/form-data',
         success: function (response) {
-            // TODO: Loading page disable
             alert("게시물을 성공적으로 삭제했습니다.");
 
+            loadingPageToggle("hide");
             $('#article-modal').hide();
+
             window.location.reload(); // FIXME: 병합 시 다른 팀원 코드와 일치 시키기
         },
         fail: function (err) {
@@ -431,14 +447,14 @@ function deleteArticle(id) {
 
 /* 이미지 삭제 (게시물 수정) */
 function deleteImage(id, img) {
-    // TODO: Loading page enable
+    loadingPageToggle("show", "이미지를 삭제 중입니다.");
     $.ajax({
         type: 'DELETE',
         url: `${WEB_SERVER_DOMAIN}/articles/image/${id}`,
         enctype: 'multipart/form-data',
         success: function (response) {
-            // TODO: Loading page disable
             alert("업로드된 이미지를 삭제했습니다.");
+            loadingPageToggle("hide");
             img.remove();
         },
         fail: function (err) {
