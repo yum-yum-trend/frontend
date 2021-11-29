@@ -31,6 +31,7 @@
     })
 
     // localStorage 에 token, username, userId가 모두 있으면 index.html로 이동
+    // FIXME : 토큰 시간 만료 시 local Storage를 비우는 로직 추가 필요
     function checkLocalStorage() {
         if (localStorage.getItem("token") && localStorage.getItem("username") && localStorage.getItem("userId")) {
             location.href = 'index.html'
@@ -109,12 +110,12 @@
         </div>
         <div class="col-md-12 text-center">
             <p>
-                <button type="submit" class=" btn btn-block btn-primary tx-tfm" onclick="login()">로그인</button>
+                <button type="submit" class="btn btn-block btn-primary tx-tfm" onclick="login()">로그인</button>
             </p>
         </div>
         <div class="col-md-12 mb-3 text-center ">
             </p>
-            <button type="submit" class=" btn btn-block btn-warning tx-tfm" onclick="loginWithKakao()">카카오 로그인</button>
+            <button type="submit" class="btn btn-block btn-warning tx-tfm" onclick="loginWithKakao()">카카오 로그인</button>
             </p>
         </div>
         <div class="form-group">

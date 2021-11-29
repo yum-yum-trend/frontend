@@ -23,36 +23,45 @@
                     </div>
                 </div>
                 <div class="modal-right">
-                    <div>
+                    <div id="article-user-texts-comments-div">
+                        <!-- 작성자 프로필 사진 & 사용자 이름 -->
                         <img id="article-user-profile-img" src="/images/profile_placeholder.png" alt="profile image"
                              style="border-radius: 50%">
                         <span id="article-username">사용자 이름</span>
-                    </div>
-                    <div>
-                        <textarea id="article-textarea" class="modal-dynamic-contents"
-                                  placeholder="내용을 입력해주세요."></textarea> <!-- 게시글 등록 -->
-                        <div id="article-text-div" class="modal-dynamic-contents" style="display: none;"></div>
-                        <!-- 게시글 상세보기 -->
-                    </div>
-                    <div class="text-line-limit">
-                        <i class="fas fa-map-marker-alt article-content-icon" aria-hidden="true"></i> 위치
-                        <div class="gps-setting" id="user-gps-setting" onclick="gpsSetting()" >GPS 설정 <i class="fas fa-map-marker"></i></div>
-                        <div class="input-group mb-3" id="article-location-input-div">
-                            <input id="search-input" type="text" class="form-control" placeholder="지도">
-                            <div class="input-group-append">
-                                <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
-                            </div>
+
+                        <!-- 게시물 내용 -->
+                        <div>
+                            <!-- 게시글 등록 -->
+                            <textarea id="article-textarea" class="modal-dynamic-contents" placeholder="내용을 입력해주세요."></textarea>
+                            <!-- 게시글 상세보기 -->
+                            <div id="article-text-div" class="modal-dynamic-contents" style="display: none;"></div>
                         </div>
-                        <div id="article-location-div" class="modal-dynamic-contents">
-                            <!-- <div id="article-location-div" class="modal-dynamic-contents"> -->
-                        </div>
-                        <div id="article-location-list-div" class="modal-dynamic-contents">
+                        <div id="article-comment-div">
 
                         </div>
-                        <ul class="pagination" style="justify-content: center; " id="pagination" class="modal-dynamic-contents">
-                        </ul>
+
                     </div>
+
                     <div>
+                        <!-- 위치 태그 -->
+                        <div class="text-line-limit">
+                            <i class="fas fa-map-marker-alt article-content-icon" aria-hidden="true"></i> 위치
+                            <div class="gps-setting" id="user-gps-setting" onclick="gpsSetting()" >GPS 설정 <i class="fas fa-map-marker"></i></div>
+                            <div class="input-group mb-3" id="article-location-input-div">
+                                <input id="search-input" type="text" class="form-control" placeholder="지도">
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                </div>
+                            </div>
+                            <div id="article-location-div" class="modal-dynamic-contents">
+                            </div>
+                            <div id="article-location-list-div" class="modal-dynamic-contents">
+                            </div>
+                            <ul class="pagination" style="justify-content: center; " id="pagination" class="modal-dynamic-contents">
+                            </ul>
+                        </div>
+
+                        <!-- 해시 태그 -->
                         <i class="fa fa-hashtag article-content-icon" aria-hidden="true"></i> 해시태그
                         <div class="input-group mb-3" id="article-tag-input-div">
                             <input type="text" id="tag-input" class="form-control" placeholder="해시태그">
@@ -60,11 +69,20 @@
                                 <span class="input-group-text"><i class="fa fa-plus" aria-hidden="true"></i></span>
                             </div>
                         </div>
+
                         <div id="tag-list" class="modal-dynamic-contents">
                             <!-- 입력한 해시태그 출력 -->
                         </div>
-                        <div id="article-like-count">
 
+                        <!-- 좋아요 & 좋아요 수 출력 -->
+                        <div id="article-like-count">
+                        </div>
+
+                        <!-- 댓글 입력창 -->
+                        <div class="input-group" id="article-comment-input-div">
+                            <input type="text" class="form-control" id="article-comment-input-box" placeholder="댓글..." aria-label="" aria-describedby="">
+                            <div class="input-group-append modal-dynamic-contents" id="article-comment-input-button-div">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -96,5 +114,4 @@
 <script>
     registerEventListener();
     locationRegisterEventListener();
-    modalEventListener();
 </script>
