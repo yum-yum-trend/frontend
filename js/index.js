@@ -5,6 +5,7 @@ let tagNames = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
+let rmImageIdList = [];
 
 let gArticle;
 
@@ -186,7 +187,7 @@ function articleModalToggle(action) {
             $('#article-location-list-div').empty();
 
             $('#article-username').text(localStorage.getItem("username"));
-            // TODO: 사용자 프로필 이미지 사진 설정 (#user-profile-img)
+            $('#article-user-profile-img').attr('src', $('#nav-user-profile-image').attr('src'));
 
             $('#article-modal').modal({backdrop: false, keyboard: false, show: true});
             break;
@@ -430,6 +431,13 @@ function getArticle(id) {
 /* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
     $('.modal-dynamic-contents').empty();
+
+    if (gArticle.user.userProfileImageUrl) {
+        $("#article-user-profile-img").attr("src", gArticle.user.userProfileImageUrl);
+    } else {
+        $("#article-user-profile-img").attr("src", "/images/profile_placeholder.png");
+    }
+
     if (action == "get") {
         $('#article-username').text(gArticle.user.username);
         $('#article-text-div').text(gArticle.text);
@@ -499,7 +507,7 @@ function makeArticleContents(action) {
 
         totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="totalImageFileCnt--; deleteImage(${image.id}, this)">
+            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
                                 <img src="${image.url}" class="article-image"/>
                                  <div class="article-image-container-middle" >
                                     <div class="text">삭제</div>
@@ -519,6 +527,16 @@ function makeArticleContents(action) {
     }
 }
 
+
+/* 이미지 삭제 (업로드된 이미지들 중) */
+function removeImage(id, img) {
+    rmImageIdList.push(id);
+
+    totalImageFileCnt--;
+    img.remove();
+}
+
+
 /* 게시물 수정 */
 function updateArticle(id) {
     if(!checkArticleImagesInput()) return;
@@ -534,6 +552,10 @@ function updateArticle(id) {
     Object.keys(imageFileDict).forEach(function (key) {
         formData.append("imageFiles", imageFileDict[key]);
     });
+
+    rmImageIdList.forEach(function (id) {
+        formData.append("rmImageIdList", id);
+    })
 
 
     $.ajax({
@@ -558,6 +580,7 @@ function updateArticle(id) {
     })
 }
 
+
 /* 게시물 삭제 */
 function deleteArticle(id) {
     loadingPageToggle("show", "게시물을 삭제 중입니다.");
@@ -571,25 +594,6 @@ function deleteArticle(id) {
 
             loadingPageToggle("hide");
             $('#article-modal').hide();
-        },
-        fail: function (err) {
-            alert("fail");
-        }
-    })
-}  
-
-
-/* 이미지 삭제 (게시물 수정) */
-function deleteImage(id, img) {
-    loadingPageToggle("show", "이미지를 삭제 중입니다.");
-    $.ajax({
-        type: 'DELETE',
-        url: `${WEB_SERVER_DOMAIN}/articles/image/${id}`,
-        enctype: 'multipart/form-data',
-        success: function (response) {
-            alert("업로드된 이미지를 삭제했습니다.");
-            loadingPageToggle("hide");
-            img.remove();
         },
         fail: function (err) {
             alert("fail");
