@@ -69,6 +69,10 @@
     align-content: space-between;
 }
 
+#article-user-texts-comments-div {
+    overflow-y: auto;
+}
+
 #article-user-profile-img {
     width: 50px;
     height: 50px;
@@ -90,7 +94,12 @@
 }
 
 #article-text-div {
-    margin-top : 10px;
+    width: 100%;
+    margin-top: 20px;
+
+    border: none;
+    outline: none;
+    resize: none;
 }
 
 #article-location-div {
@@ -170,7 +179,7 @@
 
 .comment {
     display: flex;
-    margin-top : 10px;
+    margin-top : 20px;
 }
 
 .comment-user-profile-image{
@@ -194,4 +203,5 @@
 .x {
     float: right;
     margin-left : 5px;
+    margin-right : 5px;
 }

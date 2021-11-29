@@ -235,8 +235,8 @@ function showArticles() {
             makeArticles(response);
             deleteSelectLocation();
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (request) {
+            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
         }
     })
 }
@@ -374,7 +374,7 @@ function makeArticleContents(article) {
     }
 
     // 댓글 버튼
-    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" onclick="postComment(${article.article.id})">게시하기</button>`
+    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${article.article.id}" onclick="postComment(${article.article.id})">게시하기</button>`
     $('#article-comment-input-button-div').append(tempHtml);
 
 }
@@ -401,16 +401,17 @@ function showArticleComments(articleId) {
         success : function(response) {
             for (let i = 0; i < response.length; i++){
                 let imgSrc = response[i].userProfileImageUrl ? response[i].userProfileImageUrl : "/images/profile_placeholder.png";
-                let tempHtml = `<div class="comment-box">
+                let tempHtml = `<div class="comment-box" id="comment-box-${response[i].commentId}">
                                     <div class="comment">
                                         <img class="comment-user-profile-image for-cursor" src="${imgSrc}" onclick="location.href='profile.html?userId=${response[i].userId}'">
                                         <a class="comment-username">${response[i].username}</a>
                                         <a class="comment-text">${response[i].commentText}</a>
-                                    </div>
-                                </div>`
-                if (gUserId === response[i].userId) {
+                                    </div>`
+
+                if (gUserId === `${response[i].userId}`) {
                     tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
                 }
+                tempHtml += `</div>`
                 $('#article-comment-div').append(tempHtml)
             }
         },
@@ -422,9 +423,12 @@ function showArticleComments(articleId) {
 
 // 댓글 입력
 function postComment(articleId) {
+    let token = localStorage.getItem('token');
     let commentText = $('#article-comment-input-box').val();
 
-    if (!commentText) {
+    if (!token) {
+        return alert("로그인이 필요합니다.")
+    } else if (!commentText) {
         alert("댓글 내용을 입력해주세요.")
     } else {
         $.ajax({
@@ -435,6 +439,9 @@ function postComment(articleId) {
                 commentText : commentText
             }),
             success : function () {
+                $('#article-comment-div').empty();
+                showArticleComments(articleId);
+                $('#article-comment-input-box').val('');
                 console.log("posting comment success")
             }
         })
@@ -443,11 +450,14 @@ function postComment(articleId) {
 
 // 댓글 삭제
 function deleteComment(commentId) {
-    $.ajax({
-        type: "DELETE",
-        url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
-        success : function () {
-            alert("삭제 완료")
-        }
-    })
+    if (confirm("댓글을 삭제하시겠습니까?")) {
+        $.ajax({
+            type: "DELETE",
+            url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
+            success : function () {
+                $(`#comment-box-${commentId}`).remove();
+            }
+        })
+    }
+
 }
