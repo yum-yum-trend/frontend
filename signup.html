@@ -25,13 +25,49 @@
     <title>Yum Yum Trend</title>
 </head>
 <script>
+    function checkUsername(username) {
+        let regExp = /^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,9}$/;
+        return regExp.test(username);
+    }
+
+    function checkEmail(email) {
+        let regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+        return regExp.test(email);
+    }
+
+    function checkPassword(password) {
+        let regExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,16}$/;
+        return regExp.test(password);
+    }
+
     /* 회원가입 */
     function signup() {
-        let info = {
-            username: $("#username").val(),
-            password: $("#password").val(),
-            email: $("#email").val()
+        let username = $("#username").val();
+        let email = $("#email").val();
+        let password = $("#password").val();
+
+        if (!username) {
+            return alert("사용자 이름을 입력해주세요.")
+        } else if (!email) {
+            return alert("이메일을 입력해주세요.")
+        } else if (!password) {
+            return alert("비밀번호를 입력해주세요.")
         }
+
+        if (!checkUsername(username)) {
+            return alert("사용자 이름은 한글, 영문, 숫자만 가능하며 2 ~ 10자리 가능.")
+        } else if (!checkEmail(email)) {
+            return alert("올바르지 않은 이메일 형식입니다.")
+        } else if (!checkPassword(password)) {
+            return alert("비밀번호는 영문과 숫자 조합으로 8 ~ 16자리 가능.")
+        }
+
+        let info = {
+            username: username,
+            password: password,
+            email: email
+        }
+
         $.ajax({
             type: 'POST',
             url: `${WEB_SERVER_DOMAIN}/signup`,
