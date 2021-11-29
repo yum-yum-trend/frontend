@@ -49,12 +49,10 @@
         // 프로필 이미지 클릭 시 업로드 창 띄우기
         $(function() {
             $('#user-profile-image').click(function () {
-                console.log("hi");
                 $("input[name='imageFile']").click();
             })
 
             $('#imageFile').on('change', function (e) {
-                console.log("hi2");
                 e.preventDefault();
                 var newProfileImage = e.target.files[0];
 
