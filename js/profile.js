@@ -177,6 +177,21 @@ function showUserArticles(userId) {
         data : {},
         success : function (response) {
             makeArticles(response);
+            showUserLikes(userId)
+        }
+    })
+}
+
+/* 모든 좋아요 정보 조회 */
+function showUserLikes(userId) {
+    $.ajax({
+        type: 'GET',
+        url: `${WEB_SERVER_DOMAIN}/profile/likes/${userId}`,
+        success: function (response) {
+            makeLikes(response);
+        },
+        fail: function (err) {
+            alert("fail");
         }
     })
 }

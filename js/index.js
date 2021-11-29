@@ -6,15 +6,15 @@ let imageFileDict = {};
 let imageFileDictKey = 0;
 
 $(document).ready(function () {
-    checkLoginStatus();
+    // checkLoginStatus();
 })
 
 // localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
-function checkLoginStatus() {
-    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
-        location.href = 'login.html'
-    }
-}
+// function checkLoginStatus() {
+//     if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
+//         location.href = 'login.html'
+//     }
+// }
 
 function registerEventListener() {
     // 해시태그 입력 리스너
@@ -186,6 +186,7 @@ function addArticle() {
 
             $('#article-modal').modal('hide');
             showArticles();
+            showLikes()
         },
         fail: function (err) {
             alert("fail");
@@ -213,38 +214,58 @@ function makeArticles(articles) {
     articles.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
-                                <img onclick="getArticle(${article.article.id})" class="card-img-top" src="${article.article.imageList[0].url}" alt="Card image cap" width="100px">
-                                <div id="card-body" class="card-body">`
-
-        if (article.likes) {
-            tmpHtml += `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
+                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.imageList[0].url}" alt="Card image cap" width="100px">
+                                <div id="card-body-${article.id}" class="card-body">
+                                    <span id="card-like-${article.id}"></span>
                                     <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
                                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                                 </div>
                             </div>
                         </div>`;
-        } else {
-            tmpHtml += `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(article.likeCount)}</span>
-                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                                </div>
-                            </div>
-                        </div>`;
-        }
-
         $('#article-list').append(tmpHtml);
     })
 }
 
+/* 모든 좋아요 정보 조회 */
+function showLikes() {
+    $.ajax({
+        type: 'GET',
+        url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes` : `${WEB_SERVER_DOMAIN}/likes/guest`,
+        success: function (response) {
+            makeLikes(response);
+        },
+        fail: function (err) {
+            alert("fail");
+        }
+    })
+}
+
+function makeLikes(likes) {
+    likes.forEach(function (likeInfo) {
+        let tempHtml = ``
+        if (likeInfo.like) {
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+        } else {
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+        }
+        $(`#card-like-${likeInfo.article.id}`).append(tempHtml);
+    })
+}
+
+
 function toggleLike(articleId) {
-    if ($(`#like-icon${articleStatus}-${articleId}`).find("i").hasClass("far")) {
-        $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("fas");
-        $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("far");
-        addLike(articleId)
+    if (localStorage.getItem('token')) {
+        if ($(`#like-icon${articleStatus}-${articleId}`).find("i").hasClass("far")) {
+            $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("fas");
+            $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("far");
+            addLike(articleId)
+        } else {
+            $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("far");
+            $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("fas");
+            deleteLike(articleId)
+        }
     } else {
-        $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("far");
-        $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("fas");
-        deleteLike(articleId)
+        return alert("로그인 후 이용해주세요.");
     }
 }
 
@@ -255,6 +276,7 @@ function addLike(articleId) {
         success: function (response) {
             if (articleStatus == "-list") {
                 showArticles()
+                window.location.reload();
             } else if (articleStatus == "-modal") {
                 getArticle(articleId);
             }
@@ -272,6 +294,7 @@ function deleteLike(articleId) {
         success: function (response) {
             if (articleStatus == "-list") {
                 showArticles()
+                window.location.reload();
             } else if (articleStatus == "-modal") {
                 getArticle(articleId);
             }
@@ -290,6 +313,7 @@ function getArticle(id) {
         success: function (response) {
             console.log(response)
             makeArticleContents(response);
+            getLike(id)
         },
         fail: function (err) {
             alert("fail");
@@ -300,22 +324,22 @@ function getArticle(id) {
 function makeArticleContents(article) {
     articleModalToggle("get");
 
-    $('#article-username').text(article.article.user.username);
-    $('#article-text-div').text(article.article.text);
+    $('#article-username').text(article.user.username);
+    $('#article-text-div').text(article.text);
 
     <!-- 위치 정보 표시 -->
     $('#article-location-div').empty();
     let tmpHtml = ``
-    if (article.article.location.placeName == "집") {
-        tmpHtml = `<a>${article.article.location.placeName}</a>`
+    if (article.location.placeName == "집") {
+        tmpHtml = `<a>${article.location.placeName}</a>`
     } else {
-        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.article.location.placeName},
-                ${article.article.location.ycoordinate},${article.article.location.xcoordinate}">${article.article.location.placeName}</a>`
+        tmpHtml = `<a target='_blank' href="https://map.kakao.com/link/map/${article.location.placeName},
+                ${article.location.ycoordinate},${article.location.xcoordinate}">${article.location.placeName}</a>`
     }
     $('#article-location-div').append(tmpHtml);
 
     $('#image-list').empty();
-    article.article.imageList.forEach(function (image) {
+    article.imageList.forEach(function (image) {
         let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
                             <img src="${image.url}" class="article-image"/>
                        </div>`
@@ -323,21 +347,40 @@ function makeArticleContents(article) {
     })
 
     $('#hashtag-list').empty();
-    article.article.hashtagList.forEach(function (hashtag) {
+    article.hashtagList.forEach(function (hashtag) {
         let tmpSpan = `<span class="hashtag" style="background-color: ${createRandomColor()}">${hashtag.tag}</span>`;
         $('#hashtag-list').append(tmpSpan)
     });
+}
+
+/* 특정 게시물 좋아요 조회: 상세보기(좋아요) */
+function getLike(id) {
+    $.ajax({
+        type: 'GET',
+        url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
+        success: function (response) {
+            console.log(response)
+            makeArticleContentsByLike(response);
+        },
+        fail: function (err) {
+            alert("fail");
+        }
+    })
+}
+
+function makeArticleContentsByLike(likeInfo) {
 
     <!-- 좋아요 표시 -->
     $('#article-like-count').empty();
-    if (article.likes) {
-        let tempHtml = `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(article.likeCount)}</span>`
+    if (likeInfo.like) {
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     } else {
-        let tempHtml = `<span id="like-icon${articleStatus}-${article.article.id}" onclick="toggleLike(${article.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(article.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
 }
+
 
 // 좋아요 수 편집 (K로 나타내기)
 function num2str(likesCount) {
