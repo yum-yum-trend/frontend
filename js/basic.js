@@ -8,7 +8,7 @@ $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
 <!-- print error -->
 function printError(response) {
     if (response.responseJSON && response.responseJSON.message) {
-        alert(`[상태 코드] ${response.status} ${response.responseJSON.httpStatus}\n[오류 메시지] ${response.responseJSON.message}`);
+        alert(`상태 코드\n ${response.status} ${response.responseJSON.httpStatus}\n\n오류 메시지\n${response.responseJSON.message}`);
     }
     else {
         alert("알 수 없는 에러가 발생했습니다.");
