@@ -33,12 +33,15 @@ function showNavbarProfileImage(userId) {
                 $("#nav-user-profile-image").attr("src", "/images/profile_placeholder.png");
             }
         },
-        error: function (request) {
-            if (request.status === 401) {
+        error: function (response) {
+            // 토큰 오류 (JwtAuthenticationFilter)
+            if (response.status === 401) {
                 let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
                 $('#nav-user-profile-button').append(tempHtml)
-            } else {
-                alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+            }
+            // 애플리케이션 오류 (ApiExceptionHandler)
+            else {
+                printError(response);
             }
         }
     })
@@ -293,8 +296,8 @@ function addArticle() {
             showArticles();
             showLikes()
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -307,8 +310,8 @@ function showArticles() {
         success: function (response) {
             makeArticles(response);
         },
-        error: function (request) {
-            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -339,8 +342,8 @@ function showLikes() {
         success: function (response) {
             makeLikes(response);
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -386,8 +389,8 @@ function addLike(articleId) {
                 getArticle(articleId);
             }
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -404,8 +407,8 @@ function deleteLike(articleId) {
                 getArticle(articleId);
             }
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -422,8 +425,8 @@ function getArticle(id) {
             getLike(id);
             showArticleComments(id)
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -574,8 +577,8 @@ function updateArticle(id) {
 
             showArticles();
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -595,8 +598,8 @@ function deleteArticle(id) {
             loadingPageToggle("hide");
             $('#article-modal').hide();
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -611,8 +614,8 @@ function getLike(id) {
             console.log(response)
             makeArticleContentsByLike(response);
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -671,8 +674,8 @@ function showArticleComments(articleId) {
                 $('#article-comment-div').append(tempHtml)
             }
         },
-        error: function (request) {
-            alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -699,6 +702,9 @@ function postComment(articleId) {
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
                 console.log("posting comment success")
+            },
+            error: function (response) {
+                printError(response);
             }
         })
     }
@@ -712,6 +718,9 @@ function deleteComment(commentId) {
             url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
             success : function () {
                 $(`#comment-box-${commentId}`).remove();
+            },
+            error: function (response) {
+                printError(response);
             }
         })
     }

@@ -90,6 +90,9 @@ function resetProfileImage(userId) {
                 alert("프로필 사진이 초기화 되었습니다.");
                 $('#profile-change-modal').modal('hide');
                 location.reload();
+            },
+            error: function (response) {
+                printError(response);
             }
         })
     }
@@ -137,11 +140,11 @@ function updateUserProfileInfo(userId) {
             $('#profile-change-modal').modal('hide');
             location.reload();
         },
-        error: function (request) {
-            if (request.status === 401) {
+        error: function (response) {
+            if (response.status === 401) {
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
-                alert(`에러가 발생했습니다.\nError Code: ${request.status}\nError Text : ${request.responseText}`)
+                printError(response)
             }
         }
     })
@@ -170,6 +173,9 @@ function saveUserProfileIntroText(userId) {
             $('#profile-text-onscreen').show()
             $('#profile-intro-text').text(response);
             $('#profile-text-to-change').val(response);
+        },
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -188,6 +194,9 @@ function showUserArticles(userId) {
         success : function (response) {
             makeArticles(response);
             showUserLikes(userId)
+        },
+        error: function (response) {
+            printError(response);
         }
     })
 }
@@ -200,8 +209,8 @@ function showUserLikes(userId) {
         success: function (response) {
             makeLikes(response);
         },
-        fail: function (err) {
-            alert("fail");
+        error: function (response) {
+            printError(response)
         }
     })
 }
