@@ -46,6 +46,7 @@
 
 .profile-info{
     width: 60%;
+    height: 50%;
     display: flex;
 }
 
@@ -67,10 +68,42 @@
     margin : 50px 0 0 20px;
 }
 
-#profile-introduction{
-    position: absolute;
-    margin : 130px 0 0 0;
+.profile-introduction {
+    width: 60%;
+    height: 50%;
+    display: flex;
+    align-items: baseline;
+}
+
+#profile-text-onscreen {
+    display: flex;
+    align-items: baseline;
+    width: 500px;
+}
+
+#profile-intro-text {
+    position: relative;
     font-size: large;
+}
+
+#profile-introduction-textarea {
+    width: 350px;
+    position: relative;
+    font-size: large;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+
+}
+
+#profile-text-to-change{
+    width: 350px;
+    word-break: break-all;
+    overflow-y : auto;
+}
+
+#edit-icon {
+    margin-left : 10px;
 }
 
 .content-articles {
