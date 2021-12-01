@@ -85,8 +85,9 @@ function registerEventListener() {
                 return;
             }
 
-            if(!tag.charAt(0) != '#') {
-                tag = '#' + tag;
+            // 사용자가 # 을 같이 입력한 경우 # 제거
+            if(!tag.charAt(0) == '#') {
+                tag = tag.substring(1);
             }
 
             if(tagNames.includes(tag)) {
@@ -99,7 +100,7 @@ function registerEventListener() {
 
             let tmpSpan = `<span class="tag" 
                                  style="background-color: ${createRandomColor()}" 
-                                 onclick="removeTag(this, '${tag}')">${tag}</span>`;
+                                 onclick="removeTag(this, '${tag}')">#${tag}</span>`;
             $('#tag-list').append(tmpSpan);
 
             $('#tag-input').val('');
@@ -463,7 +464,7 @@ function makeArticleContents(action) {
         })
 
         gArticle.tags.forEach(function (tag) {
-            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}">${tag.name}</span>`;
+            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}">#${tag.name}</span>`;
             $('#tag-list').append(tmpSpan)
         })
 
@@ -521,7 +522,7 @@ function makeArticleContents(action) {
 
         gArticle.tags.forEach(function (tag) {
             let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}"  
-                                 onclick="removeTag(this, '${tag.name}')">${tag.name}</span>`;
+                                 onclick="removeTag(this, '${tag.name}')">#${tag.name}</span>`;
             $('#tag-list').append(tmpSpan)
         })
 
