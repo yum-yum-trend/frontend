@@ -15,8 +15,8 @@ function showNavbarProfileImage(userId) {
     $.ajax({
         type: "GET",
         url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
-        data : {},
-        success : function (response) {
+        data: {},
+        success: function (response) {
             let tempHtml = `<div class="nav-item nav-link" >
                                 <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   <div class="dropdown-menu">
@@ -77,11 +77,11 @@ function loadingPageToggle(action, msg) {
 function registerEventListener() {
     console.log("event resgister listener");
     // 해시태그 입력 리스너
-    $("#tag-input").keydown(function(e) {
-         // 엔터키 입력 체크
+    $("#tag-input").keydown(function (e) {
+        // 엔터키 입력 체크
         if (e.keyCode == 13) {
             let tag = $('#tag-input').val();
-            if(tag == '' || tag == '#') {
+            if (tag == '' || tag == '#') {
                 return;
             }
 
@@ -90,7 +90,7 @@ function registerEventListener() {
                 tag = tag.substring(1);
             }
 
-            if(tagNames.includes(tag)) {
+            if (tagNames.includes(tag)) {
                 alert("이미 입력한 해시태그입니다.");
                 $('#tag-input').val('');
                 return;
@@ -115,7 +115,7 @@ function registerEventListener() {
         // 업로드 될 파일 총 개수 검사
         totalImageFileCnt = Object.keys(imageFileDict).length + filesArr.length
         if (totalImageFileCnt > MAX_IMAGE_UPLOAD) {
-            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
+            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD + "개까지 업로드 가능합니다.");
             totalImageFileCnt -= filesArr.length;
 
             return;
@@ -152,15 +152,15 @@ function registerEventListener() {
         imageFileDict = {};
         imageFileDictKey = 0;
         deleteSelectLocation();
-        
+
         $('#article-images').val('');
         $('#article-textarea').val('');
         $('.modal-dynamic-contents').empty();
-      
+
         articleStatus = "-list";
         window.location.reload();
     })
-  
+
     // modal show 리스너
     $('#article-modal').on('show.bs.modal', function (e) {
         articleStatus = "-modal";
@@ -184,7 +184,7 @@ function articleModalToggle(action) {
             $('#article-textarea').show();
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
-            $('#pagination').show();        
+            $('#pagination').show();
             // 위치정보 검색 결과 영역 내용 삭제
             $('#article-location-div').empty();
             $('#pagination').empty();
@@ -240,8 +240,8 @@ function createRandomColor() {
 }
 
 function removeTag(span, rmTag) {
-    for(let i = 0; i < tagNames.length; i++) {
-        if(tagNames[i] == rmTag) {
+    for (let i = 0; i < tagNames.length; i++) {
+        if (tagNames[i] == rmTag) {
             tagNames.splice(i, 1);
             break;
         }
@@ -257,7 +257,7 @@ function removeImageElement(key) {
 
 function checkArticleImagesInput() {
     console.log(totalImageFileCnt);
-    if(totalImageFileCnt == 0) {
+    if (totalImageFileCnt == 0) {
         alert("최소 1개 이상의 이미지를 업로드해야합니다.");
         return false;
     }
@@ -266,7 +266,7 @@ function checkArticleImagesInput() {
 }
 
 function addArticle() {
-    if(!checkArticleImagesInput()) return;
+    if (!checkArticleImagesInput()) return;
 
     loadingPageToggle("show", "게시물을 등록 중입니다.");
 
@@ -305,9 +305,11 @@ function addArticle() {
 
 /* 모든 게시물 조회 */
 function showArticles() {
+    let tag = $("#search-tag").val();
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles`,
+        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}`,
+        contentType: 'application/json; charset=utf-8',
         success: function (response) {
             makeArticles(response);
         },
@@ -469,15 +471,14 @@ function makeArticleContents(action) {
         })
 
         // 게시물 작성자와 사용자 구별
-        if(isMe(gArticle.user.id)) {
+        if (isMe(gArticle.user.id)) {
             $('#article-delete-btn').show();
             $('#article-delete-btn').attr("onclick", `deleteArticle(${gArticle.id})`)
             $('#article-update-btn').show();
             $('#article-update-btn').html('수정하기');
             $('#article-update-btn').attr("onclick", "$('#article-delete-btn').hide(); articleModalToggle('update'); makeArticleContents('update')");
         }
-    }
-    else if (action == "update") {
+    } else if (action == "update") {
         gArticle.tags.forEach(function (tag) {
             tagNames.push(tag.name);
         })
@@ -543,7 +544,7 @@ function removeImage(id, img) {
 
 /* 게시물 수정 */
 function updateArticle(id) {
-    if(!checkArticleImagesInput()) return;
+    if (!checkArticleImagesInput()) return;
 
     loadingPageToggle("show", "게시물을 수정 중입니다.");
 
@@ -656,10 +657,10 @@ function num2str(likesCount) {
 // 게시물 상세보기 - 댓글
 function showArticleComments(articleId) {
     $.ajax({
-        type : "GET",
-        url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
-        success : function(response) {
-            for (let i = 0; i < response.length; i++){
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+        success: function (response) {
+            for (let i = 0; i < response.length; i++) {
                 let imgSrc = response[i].userProfileImageUrl ? response[i].userProfileImageUrl : "/images/profile_placeholder.png";
                 let tempHtml = `<div class="comment-box modal-dynamic-contents" id="comment-box-${response[i].commentId}">
                                     <div class="comment">
@@ -692,13 +693,13 @@ function postComment(articleId) {
         alert("댓글 내용을 입력해주세요.")
     } else {
         $.ajax({
-            type : "POST",
-            url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+            type: "POST",
+            url: `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
             contentType: "application/json",
             data: JSON.stringify({
-                commentText : commentText
+                commentText: commentText
             }),
-            success : function () {
+            success: function () {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
@@ -716,8 +717,8 @@ function deleteComment(commentId) {
     if (confirm("댓글을 삭제하시겠습니까?")) {
         $.ajax({
             type: "DELETE",
-            url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
-            success : function () {
+            url: `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
+            success: function () {
                 $(`#comment-box-${commentId}`).remove();
             },
             error: function (response) {
