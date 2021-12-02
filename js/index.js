@@ -176,7 +176,6 @@ function registerEventListener() {
 
 
         if (IS_END && !isApiCalling && !lastPage) {
-            console.log("ddd")
             showArticles();
         }
     })
@@ -339,7 +338,6 @@ function showArticles() {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    console.log(lastPage)
     articles.content.forEach(function (article, index) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
@@ -353,7 +351,6 @@ function makeArticles(articles) {
                         </div>`;
 
         if(index == articles.content.length - 1) {
-            console.log("ddd")
             currentPage += 1
         }
         $('#article-list').append(tmpHtml);
@@ -636,7 +633,6 @@ function getLike(id) {
         type: 'GET',
         url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
         success: function (response) {
-            console.log(response)
             makeArticleByLike(response);
         },
         error: function (response) {
