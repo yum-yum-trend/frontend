@@ -317,7 +317,13 @@ function addArticle() {
 }
 
 /* 모든 게시물 조회 */
-function showArticles() {
+function showArticles(search) {
+    // 검색버튼에만 search변수를 넣어줬습니다.(임의의 숫자 1)
+    if(search) {
+        currentPage = 0;
+        $('#article-list').empty();
+    }
+
     isApiCalling = true;
     let sorting = "createdAt";
     let isAsc = false;
@@ -338,7 +344,7 @@ function showArticles() {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    articles.content.forEach(function (article, index) {
+    articles.content.forEach(function (article) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
@@ -349,12 +355,13 @@ function makeArticles(articles) {
                                 </div>
                             </div>
                         </div>`;
-
-        if(index == articles.content.length - 1) {
-            currentPage += 1
-        }
         $('#article-list').append(tmpHtml);
     })
+
+    if(articles.totalPages != articles.number + 1) {
+        currentPage += 1
+    }
+
     isApiCalling = false;
 }
 
