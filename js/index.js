@@ -6,6 +6,9 @@ let imageFileDict = {};
 let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
 let rmImageIdList = [];
+let currentPage = 0;
+let isApiCalling = false;
+let lastPage = false;
 
 let gArticle;
 
@@ -158,12 +161,24 @@ function registerEventListener() {
         $('.modal-dynamic-contents').empty();
 
         articleStatus = "-list";
-        window.location.reload();
     })
 
     // modal show 리스너
     $('#article-modal').on('show.bs.modal', function (e) {
         articleStatus = "-modal";
+    })
+
+    window.addEventListener("scroll", function () {
+        const SCROLLED_HEIGHT = window.scrollY;
+        const WINDOW_HEIGHT = window.innerHeight;
+        const DOC_TOTAL_HEIGHT = document.body.offsetHeight;
+        const IS_END = (WINDOW_HEIGHT + SCROLLED_HEIGHT > DOC_TOTAL_HEIGHT - 500);
+
+
+        if (IS_END && !isApiCalling && !lastPage) {
+            console.log("ddd")
+            showArticles();
+        }
     })
 }
 
@@ -295,7 +310,6 @@ function addArticle() {
             $('#article-modal').modal('hide');
 
             showArticles();
-            showLikes()
         },
         error: function (response) {
             printError(response);
@@ -305,13 +319,17 @@ function addArticle() {
 
 /* 모든 게시물 조회 */
 function showArticles() {
+    isApiCalling = true;
+    let sorting = "createdAt";
+    let isAsc = false;
     let tag = $("#search-tag").val();
+
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}`,
-        contentType: 'application/json; charset=utf-8',
+        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
         success: function (response) {
-            makeArticles(response);
+            makeArticles(response)
+            showLikes()
         },
         error: function (response) {
             printError(response);
@@ -320,9 +338,9 @@ function showArticles() {
 }
 
 function makeArticles(articles) {
-    console.log(articles)
-    $('#article-list').empty();
-    articles.forEach(function (article) {
+    lastPage = articles.last;
+    console.log(lastPage)
+    articles.content.forEach(function (article, index) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
@@ -333,8 +351,14 @@ function makeArticles(articles) {
                                 </div>
                             </div>
                         </div>`;
+
+        if(index == articles.content.length - 1) {
+            console.log("ddd")
+            currentPage += 1
+        }
         $('#article-list').append(tmpHtml);
     })
+    isApiCalling = false;
 }
 
 /* 모든 좋아요 정보 조회 */
@@ -353,13 +377,14 @@ function showLikes() {
 
 function makeLikes(likes) {
     likes.forEach(function (likeInfo) {
+        $(`#card-like-${likeInfo.articleId}`).empty();
         let tempHtml = ``
         if (likeInfo.like) {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         } else {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         }
-        $(`#card-like-${likeInfo.article.id}`).append(tempHtml);
+        $(`#card-like-${likeInfo.articleId}`).append(tempHtml);
     })
 }
 
@@ -386,10 +411,9 @@ function addLike(articleId) {
         url: `${WEB_SERVER_DOMAIN}/articles/like?articleId=${articleId}`,
         success: function (response) {
             if (articleStatus == "-list") {
-                showArticles()
-                window.location.reload();
+                showLikes()
             } else if (articleStatus == "-modal") {
-                getArticle(articleId);
+                getLike(articleId);
             }
         },
         error: function (response) {
@@ -404,10 +428,9 @@ function deleteLike(articleId) {
         url: `${WEB_SERVER_DOMAIN}/articles/unlike?articleId=${articleId}`,
         success: function (response) {
             if (articleStatus == "-list") {
-                showArticles()
-                window.location.reload();
+                showLikes()
             } else if (articleStatus == "-modal") {
-                getArticle(articleId);
+                getLike(articleId);
             }
         },
         error: function (response) {
@@ -425,6 +448,7 @@ function getArticle(id) {
             gArticle = response;
             articleModalToggle("get");
             makeArticleContents("get");
+            makeArticleCommentButton(id)
             getLike(id);
             showArticleComments(id)
         },
@@ -606,7 +630,6 @@ function deleteArticle(id) {
     })
 }
 
-
 /* 특정 게시물 좋아요 조회: 상세보기(좋아요) */
 function getLike(id) {
     $.ajax({
@@ -614,7 +637,7 @@ function getLike(id) {
         url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
         success: function (response) {
             console.log(response)
-            makeArticleContentsByLike(response);
+            makeArticleByLike(response);
         },
         error: function (response) {
             printError(response);
@@ -622,20 +645,21 @@ function getLike(id) {
     })
 }
 
-function makeArticleContentsByLike(likeInfo) {
-
+function makeArticleByLike(likeInfo) {
     <!-- 좋아요 표시 -->
     $('#article-like-count').empty();
     if (likeInfo.like) {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     } else {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
+}
 
+function makeArticleCommentButton(articleId) {
     // 댓글 버튼
-    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${likeInfo.article.id}" onclick="postComment(${likeInfo.article.id})">게시하기</button>`
+    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${articleId}" onclick="postComment(${articleId})">게시하기</button>`
     $('#article-comment-input-button-div').append(tempHtml);
 }
 
