@@ -308,7 +308,7 @@ function addArticle() {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles();
+            showArticles(1);
         },
         error: function (response) {
             printError(response);
@@ -323,6 +323,7 @@ function showArticles(search) {
         currentPage = 0;
         $('#article-list').empty();
     }
+    console.log(currentPage);
 
     isApiCalling = true;
     let sorting = "createdAt";
@@ -345,7 +346,7 @@ function showArticles(search) {
 function makeArticles(articles) {
     lastPage = articles.last;
     articles.content.forEach(function (article) {
-        let tmpHtml = ` <div class="col-3">
+        let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
@@ -357,12 +358,10 @@ function makeArticles(articles) {
                         </div>`;
         $('#article-list').append(tmpHtml);
     })
-
+    isApiCalling = false;
     if(articles.totalPages != articles.number + 1) {
         currentPage += 1
     }
-
-    isApiCalling = false;
 }
 
 /* 모든 좋아요 정보 조회 */
@@ -418,6 +417,7 @@ function addLike(articleId) {
                 showLikes()
             } else if (articleStatus == "-modal") {
                 getLike(articleId);
+                showLikes();
             }
         },
         error: function (response) {
@@ -435,6 +435,7 @@ function deleteLike(articleId) {
                 showLikes()
             } else if (articleStatus == "-modal") {
                 getLike(articleId);
+                showLikes();
             }
         },
         error: function (response) {
@@ -605,7 +606,7 @@ function updateArticle(id) {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles();
+            showArticles(1);
         },
         error: function (response) {
             printError(response);
@@ -626,7 +627,8 @@ function deleteArticle(id) {
             alert("게시물을 성공적으로 삭제했습니다.");
 
             loadingPageToggle("hide");
-            $('#article-modal').hide();
+            $('#article-modal').modal('hide');
+            $(`#article-id-${id}`).remove();
         },
         error: function (response) {
             printError(response);
