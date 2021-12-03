@@ -6,6 +6,9 @@ let imageFileDict = {};
 let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
 let rmImageIds = [];
+let currentPage = 0;
+let isApiCalling = false;
+let lastPage = false;
 
 let gArticle;
 
@@ -24,8 +27,8 @@ function showNavbarProfileImage(userId) {
     $.ajax({
         type: "GET",
         url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
-        data : {},
-        success : function (response) {
+        data: {},
+        success: function (response) {
             let tempHtml = `<div class="nav-item nav-link" >
                                 <img id="nav-user-profile-image" class="for-cursor" src="" alt="profile image" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   <div class="dropdown-menu">
@@ -88,19 +91,20 @@ function loadingPageToggle(action, msg) {
 function registerEventListener() {
     console.log("event resgister listener");
     // 해시태그 입력 리스너
-    $("#tag-input").keydown(function(e) {
-         // 엔터키 입력 체크
+    $("#tag-input").keydown(function (e) {
+        // 엔터키 입력 체크
         if (e.keyCode == 13) {
             let tag = $('#tag-input').val();
-            if(tag == '' || tag == '#') {
+            if (tag == '' || tag == '#') {
                 return;
             }
 
-            if(!tag.charAt(0) != '#') {
-                tag = '#' + tag;
+            // 사용자가 # 을 같이 입력한 경우 # 제거
+            if(!tag.charAt(0) == '#') {
+                tag = tag.substring(1);
             }
 
-            if(tagNames.includes(tag)) {
+            if (tagNames.includes(tag)) {
                 alert("이미 입력한 해시태그입니다.");
                 $('#tag-input').val('');
                 return;
@@ -110,7 +114,7 @@ function registerEventListener() {
 
             let tmpSpan = `<span class="tag" 
                                  style="background-color: ${createRandomColor()}" 
-                                 onclick="removeTag(this, '${tag}')">${tag}</span>`;
+                                 onclick="removeTag(this, '${tag}')">#${tag}</span>`;
             $('#tag-list').append(tmpSpan);
 
             $('#tag-input').val('');
@@ -125,7 +129,7 @@ function registerEventListener() {
         // 업로드 될 파일 총 개수 검사
         totalImageFileCnt = Object.keys(imageFileDict).length + filesArr.length
         if (totalImageFileCnt > MAX_IMAGE_UPLOAD) {
-            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD +"개까지 업로드 가능합니다.");
+            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD + "개까지 업로드 가능합니다.");
             totalImageFileCnt -= filesArr.length;
 
             return;
@@ -162,18 +166,29 @@ function registerEventListener() {
         imageFileDict = {};
         imageFileDictKey = 0;
         deleteSelectLocation();
-        
+
         $('#article-images').val('');
         $('#article-textarea').val('');
         $('.modal-dynamic-contents').empty();
-      
+
         articleStatus = "-list";
-        window.location.reload();
     })
-  
+
     // modal show 리스너
     $('#article-modal').on('show.bs.modal', function (e) {
         articleStatus = "-modal";
+    })
+
+    window.addEventListener("scroll", function () {
+        const SCROLLED_HEIGHT = window.scrollY;
+        const WINDOW_HEIGHT = window.innerHeight;
+        const DOC_TOTAL_HEIGHT = document.body.offsetHeight;
+        const IS_END = (WINDOW_HEIGHT + SCROLLED_HEIGHT > DOC_TOTAL_HEIGHT - 500);
+
+
+        if (IS_END && !isApiCalling && !lastPage) {
+            showArticles();
+        }
     })
 }
 
@@ -194,7 +209,7 @@ function articleModalToggle(action) {
             $('#article-textarea').show();
             $('#user-gps-setting').show();
             $('#article-location-list-div').show();
-            $('#pagination').show();        
+            $('#pagination').show();
             // 위치정보 검색 결과 영역 내용 삭제
             $('#article-location-div').empty();
             $('#pagination').empty();
@@ -250,8 +265,8 @@ function createRandomColor() {
 }
 
 function removeTag(span, rmTag) {
-    for(let i = 0; i < tagNames.length; i++) {
-        if(tagNames[i] == rmTag) {
+    for (let i = 0; i < tagNames.length; i++) {
+        if (tagNames[i] == rmTag) {
             tagNames.splice(i, 1);
             break;
         }
@@ -267,7 +282,7 @@ function removeImageElement(key) {
 
 function checkArticleImagesInput() {
     console.log(totalImageFileCnt);
-    if(totalImageFileCnt == 0) {
+    if (totalImageFileCnt == 0) {
         alert("최소 1개 이상의 이미지를 업로드해야합니다.");
         return false;
     }
@@ -276,7 +291,7 @@ function checkArticleImagesInput() {
 }
 
 function addArticle() {
-    if(!checkArticleImagesInput()) return;
+    if (!checkArticleImagesInput()) return;
 
     loadingPageToggle("show", "게시물을 등록 중입니다.");
 
@@ -305,7 +320,6 @@ function addArticle() {
             $('#article-modal').modal('hide');
 
             showArticles();
-            showLikes()
         },
         error: function (response) {
             printError(response);
@@ -315,11 +329,17 @@ function addArticle() {
 
 /* 모든 게시물 조회 */
 function showArticles() {
+    isApiCalling = true;
+    let sorting = "createdAt";
+    let isAsc = false;
+    let tag = $("#search-tag").val();
+
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles`,
+        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
         success: function (response) {
-            makeArticles(response);
+            makeArticles(response)
+            showLikes()
         },
         error: function (response) {
             printError(response);
@@ -328,9 +348,8 @@ function showArticles() {
 }
 
 function makeArticles(articles) {
-    console.log(articles)
-    $('#article-list').empty();
-    articles.forEach(function (article) {
+    lastPage = articles.last;
+    articles.content.forEach(function (article, index) {
         let tmpHtml = ` <div class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
@@ -341,8 +360,13 @@ function makeArticles(articles) {
                                 </div>
                             </div>
                         </div>`;
+
+        if(index == articles.content.length - 1) {
+            currentPage += 1
+        }
         $('#article-list').append(tmpHtml);
     })
+    isApiCalling = false;
 }
 
 /* 모든 좋아요 정보 조회 */
@@ -361,13 +385,14 @@ function showLikes() {
 
 function makeLikes(likes) {
     likes.forEach(function (likeInfo) {
+        $(`#card-like-${likeInfo.articleId}`).empty();
         let tempHtml = ``
         if (likeInfo.like) {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         } else {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         }
-        $(`#card-like-${likeInfo.article.id}`).append(tempHtml);
+        $(`#card-like-${likeInfo.articleId}`).append(tempHtml);
     })
 }
 
@@ -394,10 +419,9 @@ function addLike(articleId) {
         url: `${WEB_SERVER_DOMAIN}/articles/like?articleId=${articleId}`,
         success: function (response) {
             if (articleStatus == "-list") {
-                showArticles()
-                window.location.reload();
+                showLikes()
             } else if (articleStatus == "-modal") {
-                getArticle(articleId);
+                getLike(articleId);
             }
         },
         error: function (response) {
@@ -412,10 +436,9 @@ function deleteLike(articleId) {
         url: `${WEB_SERVER_DOMAIN}/articles/unlike?articleId=${articleId}`,
         success: function (response) {
             if (articleStatus == "-list") {
-                showArticles()
-                window.location.reload();
+                showLikes()
             } else if (articleStatus == "-modal") {
-                getArticle(articleId);
+                getLike(articleId);
             }
         },
         error: function (response) {
@@ -433,6 +456,7 @@ function getArticle(id) {
             gArticle = response;
             articleModalToggle("get");
             makeArticleContents("get");
+            makeArticleCommentButton(id)
             getLike(id);
             showArticleComments(id)
         },
@@ -478,20 +502,19 @@ function makeArticleContents(action) {
         })
 
         gArticle.tags.forEach(function (tag) {
-            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}">${tag.name}</span>`;
+            let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}">#${tag.name}</span>`;
             $('#tag-list').append(tmpSpan)
         })
 
         // 게시물 작성자와 사용자 구별
-        if(isMe(gArticle.user.id)) {
+        if (isMe(gArticle.user.id)) {
             $('#article-delete-btn').show();
             $('#article-delete-btn').attr("onclick", `deleteArticle(${gArticle.id})`)
             $('#article-update-btn').show();
             $('#article-update-btn').html('수정하기');
             $('#article-update-btn').attr("onclick", "$('#article-delete-btn').hide(); articleModalToggle('update'); makeArticleContents('update')");
         }
-    }
-    else if (action == "update") {
+    } else if (action == "update") {
         gArticle.tags.forEach(function (tag) {
             tagNames.push(tag.name);
         })
@@ -536,7 +559,7 @@ function makeArticleContents(action) {
 
         gArticle.tags.forEach(function (tag) {
             let tmpSpan = `<span class="tag" style="background-color: ${createRandomColor()}"  
-                                 onclick="removeTag(this, '${tag.name}')">${tag.name}</span>`;
+                                 onclick="removeTag(this, '${tag.name}')">#${tag.name}</span>`;
             $('#tag-list').append(tmpSpan)
         })
 
@@ -557,7 +580,7 @@ function removeImage(id, img) {
 
 /* 게시물 수정 */
 function updateArticle(id) {
-    if(!checkArticleImagesInput()) return;
+    if (!checkArticleImagesInput()) return;
 
     loadingPageToggle("show", "게시물을 수정 중입니다.");
 
@@ -619,15 +642,13 @@ function deleteArticle(id) {
     })
 }
 
-
 /* 특정 게시물 좋아요 조회: 상세보기(좋아요) */
 function getLike(id) {
     $.ajax({
         type: 'GET',
         url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
         success: function (response) {
-            console.log(response)
-            makeArticleContentsByLike(response);
+            makeArticleByLike(response);
         },
         error: function (response) {
             printError(response);
@@ -635,20 +656,21 @@ function getLike(id) {
     })
 }
 
-function makeArticleContentsByLike(likeInfo) {
-
+function makeArticleByLike(likeInfo) {
     <!-- 좋아요 표시 -->
     $('#article-like-count').empty();
     if (likeInfo.like) {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     } else {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.article.id}" onclick="toggleLike(${likeInfo.article.id})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
+}
 
+function makeArticleCommentButton(articleId) {
     // 댓글 버튼
-    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${likeInfo.article.id}" onclick="postComment(${likeInfo.article.id})">게시하기</button>`
+    let tempHtml = `<button class="btn btn-outline-secondary" id="article-comment-post-button" type="button" name="${articleId}" onclick="postComment(${articleId})">게시하기</button>`
     $('#article-comment-input-button-div').append(tempHtml);
 }
 
@@ -670,10 +692,10 @@ function num2str(likesCount) {
 // 게시물 상세보기 - 댓글
 function showArticleComments(articleId) {
     $.ajax({
-        type : "GET",
-        url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
-        success : function(response) {
-            for (let i = 0; i < response.length; i++){
+        type: "GET",
+        url: `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+        success: function (response) {
+            for (let i = 0; i < response.length; i++) {
                 let imgSrc = response[i].userProfileImageUrl ? response[i].userProfileImageUrl : "/images/profile_placeholder.png";
                 let tempHtml = `<div class="comment-box modal-dynamic-contents" id="comment-box-${response[i].commentId}">
                                     <div class="comment">
@@ -706,13 +728,13 @@ function postComment(articleId) {
         alert("댓글 내용을 입력해주세요.")
     } else {
         $.ajax({
-            type : "POST",
-            url : `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
+            type: "POST",
+            url: `${WEB_SERVER_DOMAIN}/comment/${articleId}`,
             contentType: "application/json",
             data: JSON.stringify({
-                commentText : commentText
+                commentText: commentText
             }),
-            success : function () {
+            success: function () {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
@@ -730,8 +752,8 @@ function deleteComment(commentId) {
     if (confirm("댓글을 삭제하시겠습니까?")) {
         $.ajax({
             type: "DELETE",
-            url : `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
-            success : function () {
+            url: `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
+            success: function () {
                 $(`#comment-box-${commentId}`).remove();
             },
             error: function (response) {

@@ -36,7 +36,6 @@ function getCoordinate() {
             let location = response.location;
             gLat = location.lat;
             gLng = location.lng;
-            console.log(gLat, gLng);
         }
     })
 }
@@ -45,7 +44,6 @@ function getLocation(currentPage) {
     deleteSelectLocation()
     $("#article-location-list-div").empty();
 
-    console.log(currentPage)
     $.ajax({
         type: "GET",
         url: (gLat
@@ -53,7 +51,6 @@ function getLocation(currentPage) {
             : `https://dapi.kakao.com/v2/local/search/keyword.json?&page=${currentPage}&size=${KAKAO_LOCATION_SIZE}&query=` + encodeURIComponent($("#search-input").val())),
         headers: {'Authorization': `KakaoAK ${KAKAO_REST_API_KEY}`},
         success: function (response) {
-            console.log(response)
             let tempHtml = ``
             let locationInfoList = response.documents
             let pagingInfo = response.meta
