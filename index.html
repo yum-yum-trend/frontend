@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="shortcut icon" href="/static/images/favicon.png">
 
@@ -34,10 +34,12 @@
 
     <!-- Custom JS / CSS -->
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/korea-map-font-v1.css">
     <script src="/secret/secrets.js"></script>
     <script src="/js/basic.js"></script>
     <script src="/js/index.js"></script>
     <script src="/js/location.js"></script>
+    <script src="/js/trend.js"></script>
 
     <title>Yum Yum Trend</title>
 </head>
@@ -46,6 +48,7 @@
 
     $(document).ready(function () {
         $('#header').load("header.html");
+        $('#trend').load("trend.html");
         $('#list').load("list.html");
         $('#modal').load("article-modal.html");
 
@@ -55,6 +58,7 @@
 </script>
 <body>
     <header id="header"></header>
+    <section id="trend"></section>
     <section id="list"></section>
     <section id="modal"></section>
 </body>
