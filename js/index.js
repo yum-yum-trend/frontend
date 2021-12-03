@@ -5,13 +5,22 @@ let tagNames = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
-let rmImageIdList = [];
+let rmImageIds = [];
 
 let gArticle;
 
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
+    console.log(userId);
+    console.log(typeof userId);
+    if (userId == null) {
+        let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
+        $('#nav-user-profile-button').append(tempHtml);
+
+        return;
+    }
+
     $.ajax({
         type: "GET",
         url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
@@ -38,6 +47,8 @@ function showNavbarProfileImage(userId) {
             if (response.status === 401) {
                 let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
                 $('#nav-user-profile-button').append(tempHtml)
+                console.log(response)
+                console.log(response.responseJSON.message);
             }
             // 애플리케이션 오류 (ApiExceptionHandler)
             else {
@@ -431,6 +442,10 @@ function getArticle(id) {
     })
 }
 
+function replaceTextNewLine(text) {
+    return text.replace(/(\r\n|\r|\n)/g,'<br/>');
+}
+
 /* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
     $('.modal-dynamic-contents').empty();
@@ -443,7 +458,7 @@ function makeArticleContents(action) {
 
     if (action == "get") {
         $('#article-username').text(gArticle.user.username);
-        $('#article-text-div').text(gArticle.text);
+        $('#article-text-div').append(`${replaceTextNewLine(gArticle.text)}`);
 
         <!-- 위치 정보 표시 -->
         let tmpHtml = ``
@@ -533,7 +548,7 @@ function makeArticleContents(action) {
 
 /* 이미지 삭제 (업로드된 이미지들 중) */
 function removeImage(id, img) {
-    rmImageIdList.push(id);
+    rmImageIds.push(id);
 
     totalImageFileCnt--;
     img.remove();
@@ -556,8 +571,8 @@ function updateArticle(id) {
         formData.append("imageFiles", imageFileDict[key]);
     });
 
-    rmImageIdList.forEach(function (id) {
-        formData.append("rmImageIdList", id);
+    rmImageIds.forEach(function (id) {
+        formData.append("rmImageIds", id);
     })
 
 
