@@ -25,6 +25,10 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.js"
+            integrity="sha512-CWVDkca3f3uAWgDNVzW+W4XJbiC3CH84P2aWZXj+DqI6PNbTzXbl1dIzEHeNJpYSn4B6U8miSZb/hCws7FnUZA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.css"/>
 
     <!-- Google Font -->
@@ -34,16 +38,19 @@
 
     <!-- Custom JS / CSS -->
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="/css/korea-map-font-v1.css">
+    <link href="/css/koreaMap.css" rel="stylesheet" type="text/css">
     <script src="/secret/secrets.js"></script>
     <script src="/js/basic.js"></script>
     <script src="/js/index.js"></script>
     <script src="/js/location.js"></script>
     <script src="/js/trend.js"></script>
+    <script type="text/javascript" src="/js/raphael_min.js"></script>
+    <script type="text/javascript" src="/js/raphael_path_s.korea.js"></script>
 
     <title>Yum Yum Trend</title>
 </head>
 <script>
+    var sca;
     const gUserId = localStorage.getItem('userId')
 
     $(document).ready(function () {
@@ -55,11 +62,41 @@
         showNavbarProfileImage(gUserId);
         showArticles();
     });
+
+
 </script>
 <body>
-    <header id="header"></header>
-    <section id="trend"></section>
-    <section id="list"></section>
-    <section id="modal"></section>
+<header id="header"></header>
+<container>
+    <div class="list-wrap" style="display: flex;">
+        <div style="width:50%;height:400px;justify-content: center; display: flex;">
+            <div id="canvas">
+                <div id="south"></div>
+                <div id="seoul"><h2>서울특별시</h2></div>
+                <div id="gygg"><h2>경기도</h2></div>
+                <div id="incheon"><h2>인천광역시</h2></div>
+                <div id="gangwon"><h2>강원도</h2></div>
+                <div id="chungbuk"><h2>충청북도</h2></div>
+                <div id="chungnam"><h2>충청남도</h2></div>
+                <div id="daejeon"><h2>대전광역시</h2></div>
+                <div id="sejong"><h2>세종특별자치시</h2></div>
+                <div id="gwangju"><h2>광주광역시</h2></div>
+                <div id="jeonbuk"><h2>전라북도</h2></div>
+                <div id="jeonnam"><h2>전라남도</h2></div>
+                <div id="gyeongbuk"><h2>경상북도</h2></div>
+                <div id="gyeongnam"><h2>경상남도</h2></div>
+                <div id="daegu"><h2>대구광역시</h2></div>
+                <div id="busan"><h2>부산광역시</h2></div>
+                <div id="ulsan"><h2>울산광역시</h2></div>
+                <div id="jeju"><h2>제주특별자치도</h2></div>
+            </div>
+        </div>
+        <div class="myChart" style="width: 250px; height: 250px; justify-content: center;">
+            <canvas id="myChart" width="250" height="250"></canvas>
+        </div>
+    </div>
+</container>
+<section id="list"></section>
+<section id="modal"></section>
 </body>
 </html>

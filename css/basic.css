@@ -238,3 +238,8 @@
     font-size: 300px;
     color: #63786a;
 }
+
+.container {
+    display: flex;
+    flex-direction: row;
+}
