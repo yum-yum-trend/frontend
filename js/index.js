@@ -356,14 +356,24 @@ function showArticles(search) {
 
 function makeArticles(articles) {
     lastPage = articles.last;
+    console.log(articles)
+    console.log(articles.content[0]['comments'].length)
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
-                                    <span id="card-like-${article.id}"></span>
-                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                                    <div class="card-body-content">
+                                        <div class="card-body-left">
+                                            <img class="article-writter-profile-image for-cursor" src="${article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
+                                            <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
+                                        </div>
+                                        <div class="card-body-right">
+                                            <span id="card-like-${article.id}"></span>
+                                            <p class="card-text"><small class="text-muted">${articleTimeCounter(article.createdAt)}</small></p>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>`;
@@ -372,6 +382,24 @@ function makeArticles(articles) {
     isApiCalling = false;
     if(articles.totalPages != articles.number + 1) {
         currentPage += 1
+    }
+}
+
+// 시간 표시
+function articleTimeCounter(createdAt) {
+    let now = new Date();
+    let ago = now.getTime() - Date.parse(createdAt)
+    ago = Math.ceil(ago / 1000 / 60)
+
+    if (ago < 60) {
+        return `${ago} 분 전`
+    } else if ((ago / 60) < 24) {
+        return `${Math.floor(ago / 60)} 시간 전`
+    } else if ((ago / 60 / 24) < 31) {
+        return `${Math.floor(ago / 60 / 24)} 일 전`
+    } else if ((ago / 60 / 24 / 30) > 0) {
+        createdAt = createdAt.split("T")[0]
+        return createdAt
     }
 }
 
