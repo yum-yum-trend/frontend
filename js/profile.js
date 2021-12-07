@@ -142,6 +142,7 @@ function updateUserProfileInfo(userId) {
         },
         error: function (response) {
             if (response.status === 401) {
+                console.log(response)
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
                 printError(response)
@@ -183,13 +184,17 @@ function saveUserProfileIntroText(userId) {
 
 // 자신이 작성한 글 보기
 function showUserArticles(userId) {
+    isApiCalling = true;
+    let sorting = "createdAt";
+    let isAsc = false;
+
     $("#article-list").empty();
     $("#articles-division").addClass("active");
     $("#bookmarks-division").removeClass("active");
 
     $.ajax({
         type : "GET",
-        url : `${WEB_SERVER_DOMAIN}/profile/articles/${userId}`,
+        url : `${WEB_SERVER_DOMAIN}/profile/articles/${userId}?sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
         data : {},
         success : function (response) {
             makeArticles(response);
@@ -217,6 +222,7 @@ function showUserLikes(userId) {
 
 // 자신이 저장한 글 보기
 function showUserBookmarks(userId) {
+    currentPage = 0;
     $("#article-list").empty();
     $("#articles-division").removeClass("active");
     $("#bookmarks-division").addClass("active");

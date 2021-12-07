@@ -5,7 +5,7 @@ let tagNames = [];
 let imageFileDict = {};
 let imageFileDictKey = 0;
 let totalImageFileCnt = 0;
-let rmImageIdList = [];
+let rmImageIds = [];
 let currentPage = 0;
 let isApiCalling = false;
 let lastPage = false;
@@ -15,6 +15,15 @@ let gArticle;
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
+    console.log(userId);
+    console.log(typeof userId);
+    if (userId == null) {
+        let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
+        $('#nav-user-profile-button').append(tempHtml);
+
+        return;
+    }
+
     $.ajax({
         type: "GET",
         url: `${WEB_SERVER_DOMAIN}/profile/navbar-image/${userId}`,
@@ -41,6 +50,8 @@ function showNavbarProfileImage(userId) {
             if (response.status === 401) {
                 let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
                 $('#nav-user-profile-button').append(tempHtml)
+                console.log(response)
+                console.log(response.responseJSON.message);
             }
             // 애플리케이션 오류 (ApiExceptionHandler)
             else {
@@ -308,7 +319,7 @@ function addArticle() {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles();
+            showArticles(1);
         },
         error: function (response) {
             printError(response);
@@ -317,7 +328,14 @@ function addArticle() {
 }
 
 /* 모든 게시물 조회 */
-function showArticles() {
+function showArticles(search) {
+    // 검색버튼에만 search변수를 넣어줬습니다.(임의의 숫자 1)
+    if(search) {
+        currentPage = 0;
+        $('#article-list').empty();
+    }
+    console.log(currentPage);
+
     isApiCalling = true;
     let sorting = "createdAt";
     let isAsc = false;
@@ -338,24 +356,51 @@ function showArticles() {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    articles.content.forEach(function (article, index) {
-        let tmpHtml = ` <div class="col-3">
+    console.log(articles)
+    console.log(articles.content[0]['comments'].length)
+    articles.content.forEach(function (article) {
+        let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
                                 <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
-                                    <span id="card-like-${article.id}"></span>
-                                    <p class="card-title">사용자 프로필 이미지 / 사용자 이름 /댓글 수</p>
-                                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                                    <div class="card-body-content">
+                                        <div class="card-body-left">
+                                            <img class="article-writter-profile-image for-cursor" src="${article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
+                                            <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
+                                        </div>
+                                        <div class="card-body-right">
+                                            <span id="card-like-${article.id}"></span>
+                                            <p class="card-text"><small class="text-muted">${articleTimeCounter(article.createdAt)}</small></p>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>`;
-
-        if(index == articles.content.length - 1) {
-            currentPage += 1
-        }
         $('#article-list').append(tmpHtml);
     })
     isApiCalling = false;
+    if(articles.totalPages != articles.number + 1) {
+        currentPage += 1
+    }
+}
+
+// 시간 표시
+function articleTimeCounter(createdAt) {
+    let now = new Date();
+    let ago = now.getTime() - Date.parse(createdAt)
+    ago = Math.ceil(ago / 1000 / 60)
+
+    if (ago < 60) {
+        return `${ago} 분 전`
+    } else if ((ago / 60) < 24) {
+        return `${Math.floor(ago / 60)} 시간 전`
+    } else if ((ago / 60 / 24) < 31) {
+        return `${Math.floor(ago / 60 / 24)} 일 전`
+    } else if ((ago / 60 / 24 / 30) > 0) {
+        createdAt = createdAt.split("T")[0]
+        return createdAt
+    }
 }
 
 /* 모든 좋아요 정보 조회 */
@@ -411,6 +456,7 @@ function addLike(articleId) {
                 showLikes()
             } else if (articleStatus == "-modal") {
                 getLike(articleId);
+                showLikes();
             }
         },
         error: function (response) {
@@ -428,6 +474,7 @@ function deleteLike(articleId) {
                 showLikes()
             } else if (articleStatus == "-modal") {
                 getLike(articleId);
+                showLikes();
             }
         },
         error: function (response) {
@@ -455,6 +502,10 @@ function getArticle(id) {
     })
 }
 
+function replaceTextNewLine(text) {
+    return text.replace(/(\r\n|\r|\n)/g,'<br/>');
+}
+
 /* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
     $('.modal-dynamic-contents').empty();
@@ -467,7 +518,7 @@ function makeArticleContents(action) {
 
     if (action == "get") {
         $('#article-username').text(gArticle.user.username);
-        $('#article-text-div').text(gArticle.text);
+        $('#article-text-div').append(`${replaceTextNewLine(gArticle.text)}`);
 
         <!-- 위치 정보 표시 -->
         let tmpHtml = ``
@@ -556,7 +607,7 @@ function makeArticleContents(action) {
 
 /* 이미지 삭제 (업로드된 이미지들 중) */
 function removeImage(id, img) {
-    rmImageIdList.push(id);
+    rmImageIds.push(id);
 
     totalImageFileCnt--;
     img.remove();
@@ -579,8 +630,8 @@ function updateArticle(id) {
         formData.append("imageFiles", imageFileDict[key]);
     });
 
-    rmImageIdList.forEach(function (id) {
-        formData.append("rmImageIdList", id);
+    rmImageIds.forEach(function (id) {
+        formData.append("rmImageIds", id);
     })
 
 
@@ -598,7 +649,7 @@ function updateArticle(id) {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles();
+            showArticles(1);
         },
         error: function (response) {
             printError(response);
@@ -619,7 +670,8 @@ function deleteArticle(id) {
             alert("게시물을 성공적으로 삭제했습니다.");
 
             loadingPageToggle("hide");
-            $('#article-modal').hide();
+            $('#article-modal').modal('hide');
+            $(`#article-id-${id}`).remove();
         },
         error: function (response) {
             printError(response);
