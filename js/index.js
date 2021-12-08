@@ -80,12 +80,11 @@ function logout() {
 
     $.ajax({
        type: "POST",
-       url: `${WEB_SERVER_DOMAIN}/auth/logout`,
+       url: `${WEB_SERVER_DOMAIN}/logout`,
        contentType: "application/json",
        data: JSON.stringify(data),
        success: function (response) {
-           console.log("here?");
-           // location.reload();
+           location.reload();
        }
     });
 }
