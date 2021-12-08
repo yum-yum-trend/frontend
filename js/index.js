@@ -71,10 +71,23 @@ function showNavbarProfileImage(userId) {
 
 // 로그아웃 (로그인 페이지로 이동)
 function logout() {
-    localStorage.removeItem("token");
+    let data = {username: localStorage.getItem("username")};
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("username");
     localStorage.removeItem("userId");
-    location.reload();
+
+    $.ajax({
+       type: "POST",
+       url: `${WEB_SERVER_DOMAIN}/auth/logout`,
+       contentType: "application/json",
+       data: JSON.stringify(data),
+       success: function (response) {
+           console.log("here?");
+           // location.reload();
+       }
+    });
 }
 
 /* 사용자 구별 */
