@@ -13,6 +13,14 @@ let lastPage = false;
 let gArticle;
 
 
+<!-- set JWT token in http request header -->
+$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+    if(localStorage.getItem('access_token')) {
+        jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
+    }
+});
+
+
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
     console.log(userId);
@@ -55,7 +63,7 @@ function showNavbarProfileImage(userId) {
             }
             // 애플리케이션 오류 (ApiExceptionHandler)
             else {
-                printError(response);
+                processError(response);
             }
         }
     })
@@ -322,7 +330,7 @@ function addArticle() {
             showArticles(1);
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -349,7 +357,7 @@ function showArticles(search) {
             showLikes()
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -357,7 +365,7 @@ function showArticles(search) {
 function makeArticles(articles) {
     lastPage = articles.last;
     console.log(articles)
-    console.log(articles.content[0]['comments'].length)
+    // console.log(articles.content[0]['comments'].length) // articles 비어있으면 오류 발생
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
@@ -407,12 +415,14 @@ function articleTimeCounter(createdAt) {
 function showLikes() {
     $.ajax({
         type: 'GET',
-        url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes` : `${WEB_SERVER_DOMAIN}/likes/guest`,
+        url: (localStorage.getItem('access_token')) ? `${WEB_SERVER_DOMAIN}/likes` : `${WEB_SERVER_DOMAIN}/likes/guest`,
         success: function (response) {
             makeLikes(response);
+            console.log("like success");
         },
         error: function (response) {
-            printError(response);
+            console.log("like error");
+            processError(response);
         }
     })
 }
@@ -432,7 +442,7 @@ function makeLikes(likes) {
 
 
 function toggleLike(articleId) {
-    if (localStorage.getItem('token')) {
+    if (localStorage.getItem('access_token')) {
         if ($(`#like-icon${articleStatus}-${articleId}`).find("i").hasClass("far")) {
             $(`#like-icon${articleStatus}-${articleId}`).find("i").addClass("fas");
             $(`#like-icon${articleStatus}-${articleId}`).find("i").removeClass("far");
@@ -460,7 +470,7 @@ function addLike(articleId) {
             }
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -478,7 +488,7 @@ function deleteLike(articleId) {
             }
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -497,7 +507,7 @@ function getArticle(id) {
             showArticleComments(id)
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -652,7 +662,7 @@ function updateArticle(id) {
             showArticles(1);
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -674,7 +684,7 @@ function deleteArticle(id) {
             $(`#article-id-${id}`).remove();
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -683,12 +693,12 @@ function deleteArticle(id) {
 function getLike(id) {
     $.ajax({
         type: 'GET',
-        url: (localStorage.getItem('token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
+        url: (localStorage.getItem('access_token')) ? `${WEB_SERVER_DOMAIN}/likes/${id}` : `${WEB_SERVER_DOMAIN}/likes/guest/${id}`,
         success: function (response) {
             makeArticleByLike(response);
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -749,14 +759,14 @@ function showArticleComments(articleId) {
             }
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
 
 // 댓글 입력
 function postComment(articleId) {
-    let token = localStorage.getItem('token');
+    let token = localStorage.getItem('access_token');
     let commentText = $('#article-comment-input-box').val();
 
     if (!token) {
@@ -778,7 +788,7 @@ function postComment(articleId) {
                 console.log("posting comment success")
             },
             error: function (response) {
-                printError(response);
+                processError(response);
             }
         })
     }
@@ -794,7 +804,7 @@ function deleteComment(commentId) {
                 $(`#comment-box-${commentId}`).remove();
             },
             error: function (response) {
-                printError(response);
+                processError(response);
             }
         })
     }

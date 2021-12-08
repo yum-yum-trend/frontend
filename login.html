@@ -33,7 +33,7 @@
     // localStorage 에 token, username, userId가 모두 있으면 index.html로 이동
     // FIXME : 토큰 시간 만료 시 local Storage를 비우는 로직 추가 필요
     function checkLocalStorage() {
-        if (localStorage.getItem("token") && localStorage.getItem("username") && localStorage.getItem("userId")) {
+        if (localStorage.getItem("access_token") && localStorage.getItem("username") && localStorage.getItem("userId")) {
             location.href = 'index.html'
         }
     }
@@ -51,16 +51,17 @@
             data: JSON.stringify(info),
             success: function (response) {
                 console.log(response);
-                localStorage.setItem("token", response['token']);
                 localStorage.setItem("username", response['username']);
                 localStorage.setItem("userId", response['id']);
+                localStorage.setItem("access_token", response['accessToken']);
+                localStorage.setItem("refresh_token", response['refreshToken']);
                 location.href = 'index.html';
             },
             error: function (response) {
                 if (response.status === 401) {
                     alert("사용자 이름과 비밀번호를 정확히 입력해주세요.")
                 } else {
-                    printError(response)
+                    processError(response)
                 }
             }
         })
@@ -77,9 +78,10 @@
                     contentType: "application/json",
                     data: JSON.stringify({'token': authObj['access_token']}),
                     success: function (response) {
-                        localStorage.setItem("token", response['token']);
                         localStorage.setItem("username", response['username']);
                         localStorage.setItem("userId", response['id']);
+                        localStorage.setItem("access_token", response['accessToken']);
+                        localStorage.setItem("refresh_token", response['refreshToken']);
                         location.href = 'index.html';
                     }
                 })

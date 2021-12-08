@@ -3,9 +3,17 @@ const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.lo
 const gIsMyPage = (gUserId === gProfileUserId);
 
 
+<!-- set JWT token in http request header -->
+$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+    if(localStorage.getItem('access_token')) {
+        jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
+    }
+});
+
+
 // localStorage 에 token, username, userId 하나라도 없으면 로그인 페이지로 이동
 function checkLoginStatus() {
-    if (!localStorage.getItem("token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
+    if (!localStorage.getItem("access_token") || !localStorage.getItem("username") || !localStorage.getItem("userId")) {
         location.href = 'login.html'
     }
 }
@@ -92,7 +100,7 @@ function resetProfileImage(userId) {
                 location.reload();
             },
             error: function (response) {
-                printError(response);
+                processError(response);
             }
         })
     }
@@ -145,7 +153,7 @@ function updateUserProfileInfo(userId) {
                 console.log(response)
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
-                printError(response)
+                processError(response)
             }
         }
     })
@@ -176,7 +184,7 @@ function saveUserProfileIntroText(userId) {
             $('#profile-text-to-change').val(response);
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -201,7 +209,7 @@ function showUserArticles(userId) {
             showUserLikes(userId)
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
@@ -215,7 +223,7 @@ function showUserLikes(userId) {
             makeLikes(response);
         },
         error: function (response) {
-            printError(response)
+            processError(response)
         }
     })
 }
