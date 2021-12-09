@@ -171,7 +171,7 @@ function trendShow() {
             }
         },
         error: function (response) {
-            printError(response);
+            processError(response);
         }
     })
 }
