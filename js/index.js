@@ -183,6 +183,7 @@ function registerEventListener() {
     $('#article-modal').on('hidden.bs.modal', function (e) {
         // 이전에 입력되었던 내용 삭제
         tagNames = [];
+        rmImageIds = [];
         imageFileDict = {};
         imageFileDictKey = 0;
         deleteSelectLocation();
@@ -217,6 +218,11 @@ function articleModalToggle(action) {
     switch (action) {
         // 게시글 추가
         case "add":
+            if(localStorage.getItem("access_token") == null) {
+                alert("로그인 후 이용해주세요.");
+                return;
+            }
+
             $('#article-text-div').hide();
             $('#article-update-btn').hide();
             $('#article-delete-btn').hide();
@@ -385,7 +391,7 @@ function makeArticles(articles) {
                                 <div id="card-body-${article.id}" class="card-body">
                                     <div class="card-body-content">
                                         <div class="card-body-left">
-                                            <img class="article-writter-profile-image for-cursor" src="${article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
+                                            <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
                                             <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
                                         </div>
                                         <div class="card-body-right">
