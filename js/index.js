@@ -444,9 +444,9 @@ function makeLikes(likes) {
         $(`#card-like-${likeInfo.articleId}`).empty();
         let tempHtml = ``
         if (likeInfo.like) {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon-list-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         } else {
-            tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
+            tempHtml = `<span id="like-icon-list-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> ${num2str(likeInfo.likeCount)}</span>`
         }
         $(`#card-like-${likeInfo.articleId}`).append(tempHtml);
     })
@@ -719,10 +719,10 @@ function makeArticleByLike(likeInfo) {
     <!-- 좋아요 표시 -->
     $('#article-like-count').empty();
     if (likeInfo.like) {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon-modal-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="fas fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     } else {
-        let tempHtml = `<span id="like-icon${articleStatus}-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
+        let tempHtml = `<span id="like-icon-modal-${likeInfo.articleId}" onclick="toggleLike(${likeInfo.articleId})"><i class="far fa-heart" style="color: red"></i> 좋아요 : ${num2str(likeInfo.likeCount)}</span>`
         $('#article-like-count').append(tempHtml);
     }
 }
