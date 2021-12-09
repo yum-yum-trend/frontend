@@ -4,6 +4,15 @@ let gLocationInfo = {};
 const KAKAO_LOCATION_MAX_RESULT = 9;
 const KAKAO_LOCATION_SIZE = 5;
 
+
+<!-- set JWT token in http request header -->
+$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+    if(localStorage.getItem('access_token')) {
+        jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
+    }
+});
+
+
 // 위치정보 입력 리스너
 function locationRegisterEventListener() {
     console.log("location register listener ");
