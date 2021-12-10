@@ -416,7 +416,8 @@ function articleTimeCounter(createdAt) {
     let now = new Date();
     let ago = now.getTime() - Date.parse(createdAt)
     ago = Math.ceil(ago / 1000 / 60)
-
+    ago -= 60*9
+    
     if (ago < 60) {
         return `${ago} 분 전`
     } else if ((ago / 60) < 24) {
