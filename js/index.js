@@ -415,7 +415,7 @@ function makeArticles(articles) {
 function articleTimeCounter(createdAt) {
     let now = new Date();
     let ago = now.getTime() - Date.parse(createdAt)
-    ago = Math.ceil(ago / 1000 / 60)
+    ago = Math.ceil((ago + 60*60*9) / 1000 / 60)
 
     if (ago < 60) {
         return `${ago} 분 전`
