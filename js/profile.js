@@ -3,7 +3,7 @@ const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.lo
 const gIsMyPage = (gUserId === gProfileUserId);
 
 
-<!-- set JWT token in http request header -->
+// set JWT token in http request header
 $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
     if(localStorage.getItem('access_token')) {
         jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
@@ -31,6 +31,7 @@ function showMyPageSettings() {
         $('#profile-intro-text').append(profileTextModifier)
     } else {
         let profilePictureButtonInactive = `<img id="user-profile-image" src="" alt="profile image">`
+        $('#edit-icon').hide()
         $('#profile-pic').append(profilePictureButtonInactive)
     }
 }
@@ -172,7 +173,7 @@ function saveUserProfileIntroText(userId) {
         return alert("상태 메세지는 100자를 넘길 수 없습니다.")
     }
 
-    $.ajax({ /// 상태 메시지 하나 보내는 것입니다 회원님들...
+    $.ajax({
         type : "POST",
         url : `${WEB_SERVER_DOMAIN}/profile/intro/${userId}`,
         contentType: "application/json",
