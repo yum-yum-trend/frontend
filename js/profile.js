@@ -150,7 +150,6 @@ function updateUserProfileInfo(userId) {
         },
         error: function (response) {
             if (response.status === 401) {
-                console.log(response)
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
                 processError(response)

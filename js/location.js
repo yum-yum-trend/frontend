@@ -15,7 +15,6 @@ $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
 
 // 위치정보 입력 리스너
 function locationRegisterEventListener() {
-    console.log("location register listener ");
     $('#search-input').on('keypress', function (e) {
         if (e.key == 'Enter') {
             getLocation(1);
@@ -130,9 +129,6 @@ function selectLocation(idx) {
     $("#article-location-list-div").empty();
     $("#pagination").empty();
     $("#search-input").val("");
-
-    console.log(gLocationInfo)
-
 }
 
 function deleteSelectLocation() {

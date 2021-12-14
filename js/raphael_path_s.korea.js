@@ -10,7 +10,6 @@ function trendShow() {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/trend`,
         success: function (response) {
-            console.log(response)
             locationChart();
             var attr = {
                 fill: "#fff",
@@ -239,7 +238,6 @@ function locationChart(locationName) {
                 // a must be equal to b
                 return 0;
             });
-            console.log(response);
             <!--FixMe 보여주는 데이터 전처리하는 부분에 대해 의논해볼 것(하드코딩으로 처리되어있습니다...) -->
             if (response.length<DATA_SHOW_CNT) {
                 for(let i = 0; i < response.length; i++) {

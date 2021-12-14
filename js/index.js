@@ -23,8 +23,6 @@ $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
-    console.log(userId);
-    console.log(typeof userId);
     if (userId == null) {
         let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
         $('#nav-user-profile-button').append(tempHtml);
@@ -109,7 +107,6 @@ function loadingPageToggle(action, msg) {
 
 /* 리스너 등록 함수 */
 function registerEventListener() {
-    console.log("event resgister listener");
     // 해시태그 입력 리스너
     $("#tag-input").keydown(function (e) {
         // 엔터키 입력 체크
@@ -166,14 +163,14 @@ function registerEventListener() {
             reader.onload = function (e) {
                 imageFileDict[imageFileDictKey] = file;
 
-                let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
+                let tmpHtml = `<div class="article-image-container article-image" id="image-${imageFileDictKey}">
                                 <img src="${e.target.result}" data-file=${file.name} 
-                                         class="article-image"/>
+                                         />
                                 <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
-                $('#image-list').append(tmpHtml);
+                $('#article-image-list').append(tmpHtml);
             };
             reader.readAsDataURL(file);
         });
@@ -307,7 +304,6 @@ function removeImageElement(key) {
 }
 
 function checkArticleImagesInput() {
-    console.log(totalImageFileCnt);
     if (totalImageFileCnt == 0) {
         alert("최소 1개 이상의 이미지를 업로드해야합니다.");
         return false;
@@ -360,7 +356,6 @@ function showArticles(search) {
         currentPage = 0;
         $('#article-list').empty();
     }
-    console.log(currentPage);
 
     isApiCalling = true;
     let sorting = "createdAt";
@@ -382,7 +377,6 @@ function showArticles(search) {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    console.log(articles)
     // console.log(articles.content[0]['comments'].length) // articles 비어있으면 오류 발생
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
@@ -436,10 +430,8 @@ function showLikes() {
         url: (localStorage.getItem('access_token')) ? `${WEB_SERVER_DOMAIN}/likes` : `${WEB_SERVER_DOMAIN}/likes/guest`,
         success: function (response) {
             makeLikes(response);
-            console.log("like success");
         },
         error: function (response) {
-            console.log("like error");
             processError(response);
         }
     })
@@ -559,10 +551,10 @@ function makeArticleContents(action) {
         $('#article-location-div').append(tmpHtml);
 
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
-                            <img src="${image.url}" class="article-image"/>
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}">
+                            <img src="${image.url}" class=""/>
                            </div>`
-            $('#image-list').append(tmpHtml);
+            $('#article-image-list').append(tmpHtml);
         })
 
         gArticle.tags.forEach(function (tag) {
@@ -600,9 +592,6 @@ function makeArticleContents(action) {
                 "categoryName": gArticle.location.categoryName
             }
 
-            console.log(gArticle.location)
-            console.log(gLocationInfo)
-
             tmpHtml = `<span id="article-location-span" onClick="deleteSelectLocation()">
                             <li>${gLocationInfo["placeName"]}<i className="fas fa-times"></i>
                             </li>
@@ -612,13 +601,13 @@ function makeArticleContents(action) {
 
         totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
-                                <img src="${image.url}" class="article-image"/>
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
+                                <img src="${image.url}" class=""/>
                                  <div class="article-image-container-middle" >
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
-            $('#image-list').append(tmpHtml);
+            $('#article-image-list').append(tmpHtml);
         })
 
         gArticle.tags.forEach(function (tag) {
@@ -803,7 +792,6 @@ function postComment(articleId) {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
-                console.log("posting comment success")
             },
             error: function (response) {
                 processError(response);

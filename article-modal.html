@@ -11,8 +11,13 @@
             <div class="modal-body">
                 <div class="modal-left">
                     <div class="modal-left-image-area">
-                        <div id="image-list" class="modal-dynamic-contents"></div>
-
+                        <div id="image-slider-div">
+                            <div id="article-image-list" class="modal-dynamic-contents">
+                                <!-- image slider -->
+                            </div>
+                        </div>
+                        <button id="image-prev-btn" type="button" class="btn btn-primary">이전</button>
+                        <button id="image-next-btn" type="button" class="btn btn-primary">다음</button>
                     </div>
                     <div class="modal-left-btn-area">
                         <div class="form-group" id="article-image-form">
@@ -111,7 +116,9 @@
         </div>
     </div>
 </div>
+
 <script>
     registerEventListener();
     locationRegisterEventListener();
+    initImageControlButton();
 </script>
