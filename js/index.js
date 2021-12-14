@@ -152,6 +152,10 @@ function registerEventListener() {
             return;
         }
 
+        if(totalImageFileCnt > 0) {
+            initArticleImageController();
+        }
+
         filesArr.forEach(function (file) {
             if (!file.type.match("image.*")) {
                 alert("이미지 파일만 업로드 가능합니다.");
@@ -301,6 +305,7 @@ function removeImageElement(key) {
     delete imageFileDict[key];
     $(`#image-${key}`).remove();
     totalImageFileCnt--;
+    initArticleImageController();
 }
 
 function checkArticleImagesInput() {
@@ -628,6 +633,7 @@ function removeImage(id, img) {
 
     totalImageFileCnt--;
     img.remove();
+    initArticleImageController();
 }
 
 
