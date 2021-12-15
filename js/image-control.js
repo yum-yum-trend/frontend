@@ -5,8 +5,6 @@ let prevBtn = $("#image-prev-btn");
 let nextBtn = $("#image-next-btn");
 let images = $("#article-image-list");
 
-console.log("load");
-
 function prev(){
     if(curPos > 0){
         nextBtn.removeAttr("disabled")

@@ -232,7 +232,7 @@
 
 .article-image-container {
     position: relative;
-    width: 100%;
+    width:420px;
     height: 100%;
 
     text-align: center;
@@ -241,7 +241,7 @@
 .article-image-container img {
     width:420px;
     height:100%;
-    object-fit:contain;
+    object-fit: fill;
 }
 
 .article-image-container:hover .article-image {
