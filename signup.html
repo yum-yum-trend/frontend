@@ -25,8 +25,15 @@
     <title>Yum Yum Trend</title>
 </head>
 <script>
+    let isPossibleUsername = false;
+    let checkedUsername;
+    $('#username').change(function () {
+        console.log("username onchange")
+        isPossibleUsername = false;
+    });
+
     function checkUsername(username) {
-        let regExp = /^([a-zA-Z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣]).{1,9}$/;
+        let regExp = /^([a-zA-Z0-9]){2,9}$/;
         return regExp.test(username);
     }
 
@@ -40,14 +47,47 @@
         return regExp.test(password);
     }
 
+    function checkUsernameDuplicate() {
+        let username = $('#username').val();
+        if(username == "") {
+            return;
+        }
+        if (!checkUsername(username)) {
+            return alert("사용자 이름은 영문, 숫자만 가능하며 2 ~ 10자리까지 가능합니다.");
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: `${WEB_SERVER_DOMAIN}/signup/username`,
+            contentType: "application/json",
+            data: JSON.stringify({username: username}),
+            success: function (response) {
+                isPossibleUsername = true;
+                checkedUsername = username;
+                alert("사용 가능한 아이디입니다.");
+            },
+            error: function (response) {
+                if(response.responseJSON && response.responseJSON.message) {
+                    let message = response.responseJSON.message;
+                    alert(message);
+                }
+            }
+        });
+    }
+
     /* 회원가입 */
     function signup() {
         let username = $("#username").val();
+        if(!isPossibleUsername || checkedUsername != username) {
+            isPossibleUsername = false;
+            return alert("아이디 중복을 확인해주세요.");
+        }
+
         let email = $("#email").val();
         let password = $("#password").val();
 
         if (!username) {
-            return alert("사용자 이름을 입력해주세요.")
+            return alert("아이디를 입력해주세요.")
         } else if (!email) {
             return alert("이메일을 입력해주세요.")
         } else if (!password) {
@@ -55,11 +95,11 @@
         }
 
         if (!checkUsername(username)) {
-            return alert("사용자 이름은 한글, 영문, 숫자만 가능하며 2 ~ 10자리 가능.")
+            return alert("아이디는 영문, 숫자만 가능하며 2 ~ 10자리까지 가능합니다.")
         } else if (!checkEmail(email)) {
             return alert("올바르지 않은 이메일 형식입니다.")
         } else if (!checkPassword(password)) {
-            return alert("비밀번호는 영문과 숫자 조합으로 8 ~ 16자리 가능.")
+            return alert("비밀번호는 영문과 숫자 조합으로 8 ~ 16자리까지 가능합니다.")
         }
 
         let info = {
@@ -89,19 +129,26 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="username">사용자 이름</label>
-            <input type="text" name="username" class="form-control" id="username"
-                   aria-describedby="emailHelp" placeholder="사용자이름을 입력해주세요.">
+            <label for="username">아이디</label>
+            <div class="row">
+                <div class="col-9">
+                    <input type="text" name="username" class="form-control" id="username"
+                           aria-describedby="emailHelp" placeholder="">
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-success" onclick="checkUsernameDuplicate()">중복 확인</button>
+                </div>
+            </div>
         </div>
         <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" name="email" class="form-control" id="email" aria-describedby="emailHelp"
-                   placeholder="이메일을 입력해주세요.">
+                   placeholder="">
         </div>
         <div class="form-group">
             <label for="password">비밀번호</label>
             <input type="password" name="password" id="password" class="form-control"
-                   aria-describedby="emailHelp" placeholder="비밀번호를 입력해주세요.">
+                   aria-describedby="emailHelp" placeholder="">
         </div>
         <div class="col-md-12 text-center mb-3">
             <button type="submit" class=" btn btn-block btn-primary tx-tfm" onclick="signup()">회원가입
