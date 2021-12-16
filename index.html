@@ -50,7 +50,6 @@
     <script src="/js/basic.js"></script>
     <script src="/js/index.js"></script>
     <script src="/js/location.js"></script>
-    <script src="/js/trend.js"></script>
     <script type="text/javascript" src="/js/raphael_min.js"></script>
     <script type="text/javascript" src="/js/raphael_path_s.korea.js"></script>
 
@@ -70,7 +69,6 @@
         showArticles();
     });
 
-
 </script>
 <body>
 <header id="header"></header>
@@ -78,7 +76,7 @@
     <h2 style="text-align: center; margin-top: 30px;">Trend</h2>
     <div class="list-wrap" style="display: flex; margin-top: 10px;">
         <div style="width:60%;height:400px;justify-content: center; display: flex;">
-            <button onclick="locationChart()" class="reload-button"><i class="fas fa-redo-alt"></i> 전 지역</button>
+            <button onclick="reloadChart()" class="reload-button"><i class="fas fa-redo-alt"></i> 전 지역</button>
             <div id="canvas">
                 <div id="south"></div>
                 <div id="seoul"><h2>서울특별시</h2></div>

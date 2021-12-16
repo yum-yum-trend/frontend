@@ -196,7 +196,6 @@ function showUserArticles(userId) {
     let sorting = "createdAt";
     let isAsc = false;
 
-    $("#article-list").empty();
     $("#articles-division").addClass("active");
     $("#bookmarks-division").removeClass("active");
 

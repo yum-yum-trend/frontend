@@ -206,9 +206,19 @@ function registerEventListener() {
         const DOC_TOTAL_HEIGHT = document.body.offsetHeight;
         const IS_END = (WINDOW_HEIGHT + SCROLLED_HEIGHT > DOC_TOTAL_HEIGHT - 500);
 
+        let hrefArray = window.location.href.split("/");
+        let href = hrefArray[hrefArray.length-1].split(".")[0];
+
 
         if (IS_END && !isApiCalling && !lastPage) {
-            showArticles();
+            if (href == "index") {
+                console.log("ddd")
+                showArticles();
+            } else {
+                console.log("sss")
+                showUserArticles(gProfileUserId)
+            }
+
         }
     })
 }
@@ -345,21 +355,44 @@ function addArticle() {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles(1);
+            $('#article-list').empty();
+            showArticles();
         },
         error: function (response) {
             processError(response);
         }
     })
 }
+let showSearch = "";
+let showLocation = "";
+
+function reloadChart() {
+    showLocation = "";
+    currentPage = 0;
+    $('#article-list').empty();
+    locationChart();
+    showArticles();
+}
+
+function searchArticle() {
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
+}
+
+function TrendLocationArticle(location) {
+    showLocation = location;
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles();
+}
 
 /* 모든 게시물 조회 */
-function showArticles(search) {
-    // 검색버튼에만 search변수를 넣어줬습니다.(임의의 숫자 1)
-    if(search) {
-        currentPage = 0;
-        $('#article-list').empty();
-    }
+function showArticles() {
+    console.log("showSearch"+showSearch)
+    console.log("showLocation"+showLocation)
+    let urlSource = "";
+
     console.log(currentPage);
 
     isApiCalling = true;
@@ -367,10 +400,17 @@ function showArticles(search) {
     let isAsc = false;
     let tag = $("#search-tag").val();
 
+    if (showLocation) {
+        urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}`
+    } else {
+        urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=`
+    }
+
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
+        url: urlSource,
         success: function (response) {
+            console.log(response)
             makeArticles(response)
             showLikes()
         },
@@ -677,7 +717,8 @@ function updateArticle(id) {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles(1);
+            $('#article-list').empty();
+            showArticles();
         },
         error: function (response) {
             processError(response);

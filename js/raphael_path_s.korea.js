@@ -80,86 +80,103 @@ function trendShow() {
                                 location.href = "#seoul";
                                 current = state;
                                 locationChart("서울");
+                                TrendLocationArticle("서울");
                                 break;
                             case "gygg":
                                 location.href = "#gygg";
                                 current = state;
                                 locationChart("경기");
+                                TrendLocationArticle("경기");
                                 break;
                             case "incheon":
                                 location.href = "#incheon";
                                 current = state;
                                 locationChart("인천");
+                                TrendLocationArticle("인천");
                                 break;
                             case "gangwon":
                                 location.href = "#gangwon";
                                 current = state;
                                 locationChart("강원");
+                                TrendLocationArticle("강원");
                                 break;
                             case "chungbuk":
                                 location.href = "#chungbuk";
                                 current = state;
                                 locationChart("충북");
+                                TrendLocationArticle("충북");
                                 break;
                             case "chungnam":
                                 location.href = "#chungnam";
                                 current = state;
                                 locationChart("충남");
+                                TrendLocationArticle("충남");
                                 break;
                             case "daejeon":
                                 location.href = "#daejeon";
                                 current = state;
                                 locationChart("대전");
+                                TrendLocationArticle("대전");
                                 break;
                             case "sejong":
                                 location.href = "#sejong";
                                 current = state;
                                 locationChart("세종");
+                                TrendLocationArticle("세종");
                                 break;
                             case "jeonbuk":
                                 location.href = "#jeonbuk";
                                 current = state;
                                 locationChart("전북");
+                                TrendLocationArticle("전북");
                                 break;
                             case "gwangju":
                                 location.href = "#gwangju";
                                 current = state;
                                 locationChart("광주");
+                                TrendLocationArticle("광주");
                                 break;
                             case "jeonnam":
                                 location.href = "#jeonnam";
                                 current = state;
                                 locationChart("전남");
+                                TrendLocationArticle("전남");
                                 break;
                             case "gyeongbuk":
                                 location.href = "#gyeongbuk";
                                 current = state;
                                 locationChart("경북");
+                                TrendLocationArticle("경북");
                                 break;
                             case "daegu":
                                 location.href = "#daegu";
                                 current = state;
                                 locationChart("대구");
+                                TrendLocationArticle("대구");
                                 break;
                             case "gyeongnam":
                                 location.href = "#gyeongnam";
                                 current = state;
                                 locationChart("경남");
+                                TrendLocationArticle("경남");
                                 break;
                             case "ulsan":
                                 location.href = "#ulsan";
                                 current = state;
                                 locationChart("울산");
+                                TrendLocationArticle("울산");
                                 break;
                             case "busan":
                                 location.href = "#busan";
                                 current = state;
                                 locationChart("부산");
+                                TrendLocationArticle("부산");
                                 break;
                             case "jeju":
                                 location.href = "#jeju";
                                 current = state;
                                 locationChart("제주");
+                                TrendLocationArticle("제주");
                                 break;
 
                             default:
