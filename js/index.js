@@ -9,6 +9,9 @@ let rmImageIds = [];
 let currentPage = 0;
 let isApiCalling = false;
 let lastPage = false;
+let showSearch = "";
+let showLocation = "";
+let showCategory = "";
 
 let gArticle;
 
@@ -212,13 +215,10 @@ function registerEventListener() {
 
         if (IS_END && !isApiCalling && !lastPage) {
             if (href == "index") {
-                console.log("ddd")
                 showArticles();
             } else {
-                console.log("sss")
                 showUserArticles(gProfileUserId)
             }
-
         }
     })
 }
@@ -363,11 +363,10 @@ function addArticle() {
         }
     })
 }
-let showSearch = "";
-let showLocation = "";
 
 function reloadChart() {
     showLocation = "";
+    showCategory = "";
     currentPage = 0;
     $('#article-list').empty();
     locationChart();
@@ -375,6 +374,9 @@ function reloadChart() {
 }
 
 function searchArticle() {
+    showLocation = "";
+    showCategory = "";
+    $(".trend").hide();
     currentPage = 0;
     $('#article-list').empty();
     showArticles()
@@ -382,9 +384,17 @@ function searchArticle() {
 
 function TrendLocationArticle(location) {
     showLocation = location;
+    showCategory = "";
     currentPage = 0;
     $('#article-list').empty();
     showArticles();
+}
+
+function TrendCategoryArticle(category) {
+    showCategory = category;
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
 }
 
 /* 모든 게시물 조회 */
@@ -401,9 +411,18 @@ function showArticles() {
     let tag = $("#search-tag").val();
 
     if (showLocation) {
-        urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}`
+        if (showCategory) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=${showCategory}`
+        } else {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=`
+        }
     } else {
-        urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=`
+        if (showCategory) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=${showCategory}`
+        } else {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=`
+        }
+
     }
 
     $.ajax({

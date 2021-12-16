@@ -256,15 +256,14 @@ function locationChart(locationName) {
                 // a must be equal to b
                 return 0;
             });
-            console.log(response);
             <!--FixMe 보여주는 데이터 전처리하는 부분에 대해 의논해볼 것(하드코딩으로 처리되어있습니다...) -->
-            if (response.length<DATA_SHOW_CNT) {
-                for(let i = 0; i < response.length; i++) {
+            if (response.length < DATA_SHOW_CNT) {
+                for (let i = 0; i < response.length; i++) {
                     dataInfo.push(response[i].numberOfOrderByCategoryName)
                     labelInfo.push(response[i].categoryName);
                 }
             } else {
-                for(let i = 0; i < DATA_SHOW_CNT; i++) {
+                for (let i = 0; i < DATA_SHOW_CNT; i++) {
                     dataInfo.push(response[i].numberOfOrderByCategoryName)
                     labelInfo.push(response[i].categoryName);
                 }
@@ -283,8 +282,7 @@ function locationChart(locationName) {
                         'rgb(54, 162, 235)',
                         'rgb(255, 205, 86)',
                         'rgb(70, 80, 90)',
-                        'rgb(0, 204, 90)',
-                        'rgb(153, 0, 76)',
+                        'rgb(0, 204, 90)'
                     ],
                     hoverOffset: 5
                 }]
@@ -297,7 +295,8 @@ function locationChart(locationName) {
                 options: {
                     plugins: {
                         legend: {
-                            display: false,
+                            position: 'left',
+                            display: true,
                             labels: {
                                 color: 'rgb(255, 99, 132)'
                             }
@@ -316,6 +315,19 @@ function locationChart(locationName) {
                     scales: {}
                 }
             });
+
+            $("#myChart").click(
+                function (evt) {
+                    var points = myChart.getElementsAtEventForMode(evt, 'nearest', {intersect: true}, true);
+                    console.log(points)
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        var label = myChart.data.labels[firstPoint.index];
+                        var value = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
+                        TrendCategoryArticle(label)
+                    }
+                });
         }
     })
 }
