@@ -212,7 +212,7 @@ function registerEventListener() {
             if (!url.includes("profile")) {
                 showArticles();
             } else {
-                showUserArticles(gUserId)
+                showUserArticles(gProfileUserId, true)
             }
         }
     })
@@ -397,7 +397,7 @@ function makeArticles(articles) {
                                     <div class="card-body-content">
                                         <div class="card-body-left">
                                             <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
-                                            <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
+                                            <p class="card-title">${article.user.username}<br><span id="comment-counter-article-${article.id}">💬 ${article['comments'].length}</span></p>
                                         </div>
                                         <div class="card-body-right">
                                             <span id="card-like-${article.id}"></span>
@@ -421,6 +421,7 @@ function articleTimeCounter(createdAt) {
     let now = new Date();
     let ago = now.getTime() - Date.parse(createdAt)
     ago = Math.ceil(ago / 1000 / 60)
+    ago -= 60*9
 
     if (ago < 60) {
         return `${ago} 분 전`
@@ -808,6 +809,8 @@ function postComment(articleId) {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)+1);
                 console.log("posting comment success")
             },
             error: function (response) {
@@ -825,6 +828,8 @@ function deleteComment(commentId) {
             url: `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
             success: function () {
                 $(`#comment-box-${commentId}`).remove();
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)-1);
             },
             error: function (response) {
                 processError(response);

@@ -191,12 +191,15 @@ function saveUserProfileIntroText(userId) {
 
 
 // 자신이 작성한 글 보기
-function showUserArticles(userId) {
+function showUserArticles(userId, scroll) {
     isApiCalling = true;
     let sorting = "createdAt";
     let isAsc = false;
 
-    $("#article-list").empty();
+    if (!scroll) {
+        $("#article-list").empty();
+    }
+
     $("#articles-division").addClass("active");
     $("#bookmarks-division").removeClass("active");
 
