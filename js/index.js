@@ -12,6 +12,7 @@ let lastPage = false;
 let showSearch = "";
 let showLocation = "";
 let showCategory = "";
+let showTagName = "";
 
 let gArticle;
 
@@ -367,9 +368,11 @@ function addArticle() {
 function reloadChart() {
     showLocation = "";
     showCategory = "";
+    showTagName = "";
     currentPage = 0;
     $('#article-list').empty();
     locationChart();
+    tagChart();
     showArticles();
 }
 
@@ -385,6 +388,7 @@ function searchArticle() {
 function TrendLocationArticle(location) {
     showLocation = location;
     showCategory = "";
+    showTagName = "";
     currentPage = 0;
     $('#article-list').empty();
     showArticles();
@@ -392,6 +396,15 @@ function TrendLocationArticle(location) {
 
 function TrendCategoryArticle(category) {
     showCategory = category;
+    showTagName = "";
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
+}
+
+function TrendTagArticle(tag) {
+    showCategory = "";
+    showTagName = tag;
     currentPage = 0;
     $('#article-list').empty();
     showArticles()
@@ -412,15 +425,19 @@ function showArticles() {
 
     if (showLocation) {
         if (showCategory) {
-            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=${showCategory}`
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=${showCategory}&tagName=`
+        } else if (showTagName) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=&tagName=${showTagName}`
         } else {
-            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=`
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=&tagName=`
         }
     } else {
         if (showCategory) {
-            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=${showCategory}`
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=${showCategory}&tagName=`
+        } else if (showTagName) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=&tagName=${showTagName}`
         } else {
-            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=`
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=&tagName=`
         }
 
     }
