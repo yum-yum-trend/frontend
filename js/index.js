@@ -211,8 +211,10 @@ function registerEventListener() {
             let url = location.href
             if (!url.includes("profile")) {
                 showArticles();
-            } else {
+            } else if (!url.includes("bookmarks")) {
                 showUserArticles(gProfileUserId, true)
+            } else if (url.includes("bookmarks")) {
+                showUserBookmarks(gProfileUserId, true)
             }
         }
     })
@@ -397,7 +399,7 @@ function makeArticles(articles) {
                                     <div class="card-body-content">
                                         <div class="card-body-left">
                                             <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
-                                            <p class="card-title">${article.user.username}<br><span id="comment-counter-article-${article.id}">💬 ${article['comments'].length}</span></p>
+                                            <p class="card-title">${article.user.username}<br>💬 <span id="comment-counter-article-${article.id}">${article['comments'].length}</span></p>
                                         </div>
                                         <div class="card-body-right">
                                             <span id="card-like-${article.id}"></span>
@@ -776,7 +778,7 @@ function showArticleComments(articleId) {
                                     </div>`
 
                 if (gUserId === `${response[i].userId}`) {
-                    tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
+                    tempHtml += `<a onclick="deleteComment(${response[i].commentId}, ${articleId})" aria-hidden="true" class="for-cursor x">&times;</a>`
                 }
                 tempHtml += `</div>`
                 $('#article-comment-div').append(tempHtml)
@@ -821,7 +823,7 @@ function postComment(articleId) {
 }
 
 // 댓글 삭제
-function deleteComment(commentId) {
+function deleteComment(commentId, articleId) {
     if (confirm("댓글을 삭제하시겠습니까?")) {
         $.ajax({
             type: "DELETE",
