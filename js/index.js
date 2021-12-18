@@ -208,7 +208,12 @@ function registerEventListener() {
 
 
         if (IS_END && !isApiCalling && !lastPage) {
-            showArticles();
+            let url = location.href
+            if (!url.includes("profile")) {
+                showArticles();
+            } else {
+                showUserArticles(gUserId)
+            }
         }
     })
 }
