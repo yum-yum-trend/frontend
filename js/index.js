@@ -27,8 +27,6 @@ $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
 function showNavbarProfileImage(userId) {
-    console.log(userId);
-    console.log(typeof userId);
     if (userId == null) {
         let tempHtml = `<button type="button" class="btn btn-outline-primary" onClick="location.href='login.html'">로그인</button>`
         $('#nav-user-profile-button').append(tempHtml);
@@ -109,119 +107,6 @@ function loadingPageToggle(action, msg) {
             $('#modal-load').hide();
             break;
     }
-}
-
-/* 리스너 등록 함수 */
-function registerEventListener() {
-    console.log("event resgister listener");
-    // 해시태그 입력 리스너
-    $("#tag-input").keydown(function (e) {
-        // 엔터키 입력 체크
-        if (e.keyCode == 13) {
-            let tag = $('#tag-input').val();
-            if (tag == '' || tag == '#') {
-                return;
-            }
-
-            // 사용자가 # 을 같이 입력한 경우 # 제거
-            if(!tag.charAt(0) == '#') {
-                tag = tag.substring(1);
-            }
-
-            if (tagNames.includes(tag)) {
-                alert("이미 입력한 해시태그입니다.");
-                $('#tag-input').val('');
-                return;
-            }
-
-            tagNames.push(tag);
-
-            let tmpSpan = `<span class="tag" 
-                                 style="background-color: ${createRandomColor()}" 
-                                 onclick="removeTag(this, '${tag}')">#${tag}</span>`;
-            $('#tag-list').append(tmpSpan);
-
-            $('#tag-input').val('');
-        }
-    });
-
-    // 이미지 파일 입력 리스너
-    $('#article-images').on('change', function (e) {
-        let files = e.target.files;
-        let filesArr = Array.prototype.slice.call(files);
-
-        // 업로드 될 파일 총 개수 검사
-        totalImageFileCnt = Object.keys(imageFileDict).length + filesArr.length
-        if (totalImageFileCnt > MAX_IMAGE_UPLOAD) {
-            alert("이미지는 최대 " + MAX_IMAGE_UPLOAD + "개까지 업로드 가능합니다.");
-            totalImageFileCnt -= filesArr.length;
-
-            return;
-        }
-
-        filesArr.forEach(function (file) {
-            if (!file.type.match("image.*")) {
-                alert("이미지 파일만 업로드 가능합니다.");
-                return;
-            }
-
-            // FIXME: <div> slider
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                imageFileDict[imageFileDictKey] = file;
-
-                let tmpHtml = `<div class="article-image-container" id="image-${imageFileDictKey}">
-                                <img src="${e.target.result}" data-file=${file.name} 
-                                         class="article-image"/>
-                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
-                                    <div class="text">삭제</div>
-                                </div>
-                           </div>`
-                $('#image-list').append(tmpHtml);
-            };
-            reader.readAsDataURL(file);
-        });
-    });
-
-    // modal hide 리스너
-    $('#article-modal').on('hidden.bs.modal', function (e) {
-        // 이전에 입력되었던 내용 삭제
-        tagNames = [];
-        rmImageIds = [];
-        imageFileDict = {};
-        imageFileDictKey = 0;
-        deleteSelectLocation();
-
-        $('#article-images').val('');
-        $('#article-textarea').val('');
-        $('.modal-dynamic-contents').empty();
-
-        articleStatus = "-list";
-    })
-
-    // modal show 리스너
-    $('#article-modal').on('show.bs.modal', function (e) {
-        articleStatus = "-modal";
-    })
-
-    window.addEventListener("scroll", function () {
-        const SCROLLED_HEIGHT = window.scrollY;
-        const WINDOW_HEIGHT = window.innerHeight;
-        const DOC_TOTAL_HEIGHT = document.body.offsetHeight;
-        const IS_END = (WINDOW_HEIGHT + SCROLLED_HEIGHT > DOC_TOTAL_HEIGHT - 500);
-
-        let hrefArray = window.location.href.split("/");
-        let href = hrefArray[hrefArray.length-1].split(".")[0];
-
-
-        if (IS_END && !isApiCalling && !lastPage) {
-            if (href == "index") {
-                showArticles();
-            } else {
-                showUserArticles(gProfileUserId)
-            }
-        }
-    })
 }
 
 /* 게시물 추가/보기/수정 모달 내용 토글 */
@@ -315,10 +200,10 @@ function removeImageElement(key) {
     delete imageFileDict[key];
     $(`#image-${key}`).remove();
     totalImageFileCnt--;
+    initArticleImageController();
 }
 
 function checkArticleImagesInput() {
-    console.log(totalImageFileCnt);
     if (totalImageFileCnt == 0) {
         alert("최소 1개 이상의 이미지를 업로드해야합니다.");
         return false;
@@ -416,7 +301,7 @@ function showArticles() {
     console.log("showLocation"+showLocation)
     let urlSource = "";
 
-    console.log(currentPage);
+    console.log("current page = " + currentPage);
 
     isApiCalling = true;
     let sorting = "createdAt";
@@ -458,7 +343,6 @@ function showArticles() {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    console.log(articles)
     // console.log(articles.content[0]['comments'].length) // articles 비어있으면 오류 발생
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
@@ -468,7 +352,7 @@ function makeArticles(articles) {
                                     <div class="card-body-content">
                                         <div class="card-body-left">
                                             <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
-                                            <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
+                                            <p class="card-title">${article.user.username}<br>💬 <span id="comment-counter-article-${article.id}">${article['comments'].length}</span></p>
                                         </div>
                                         <div class="card-body-right">
                                             <span id="card-like-${article.id}"></span>
@@ -492,6 +376,7 @@ function articleTimeCounter(createdAt) {
     let now = new Date();
     let ago = now.getTime() - Date.parse(createdAt)
     ago = Math.ceil(ago / 1000 / 60)
+    ago -= 60*9
 
     if (ago < 60) {
         return `${ago} 분 전`
@@ -512,10 +397,8 @@ function showLikes() {
         url: (localStorage.getItem('access_token')) ? `${WEB_SERVER_DOMAIN}/likes` : `${WEB_SERVER_DOMAIN}/likes/guest`,
         success: function (response) {
             makeLikes(response);
-            console.log("like success");
         },
         error: function (response) {
-            console.log("like error");
             processError(response);
         }
     })
@@ -635,10 +518,10 @@ function makeArticleContents(action) {
         $('#article-location-div').append(tmpHtml);
 
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}">
-                            <img src="${image.url}" class="article-image"/>
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}">
+                            <img src="${image.url}" class=""/>
                            </div>`
-            $('#image-list').append(tmpHtml);
+            $('#article-image-list').append(tmpHtml);
         })
 
         gArticle.tags.forEach(function (tag) {
@@ -676,9 +559,6 @@ function makeArticleContents(action) {
                 "categoryName": gArticle.location.categoryName
             }
 
-            console.log(gArticle.location)
-            console.log(gLocationInfo)
-
             tmpHtml = `<span id="article-location-span" onClick="deleteSelectLocation()">
                             <li>${gLocationInfo["placeName"]}<i className="fas fa-times"></i>
                             </li>
@@ -688,13 +568,13 @@ function makeArticleContents(action) {
 
         totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
-                                <img src="${image.url}" class="article-image"/>
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
+                                <img src="${image.url}" class=""/>
                                  <div class="article-image-container-middle" >
                                     <div class="text">삭제</div>
                                 </div>
                            </div>`
-            $('#image-list').append(tmpHtml);
+            $('#article-image-list').append(tmpHtml);
         })
 
         gArticle.tags.forEach(function (tag) {
@@ -715,6 +595,7 @@ function removeImage(id, img) {
 
     totalImageFileCnt--;
     img.remove();
+    initArticleImageController();
 }
 
 
@@ -847,7 +728,7 @@ function showArticleComments(articleId) {
                                     </div>`
 
                 if (gUserId === `${response[i].userId}`) {
-                    tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
+                    tempHtml += `<a onclick="deleteComment(${response[i].commentId}, ${articleId})" aria-hidden="true" class="for-cursor x">&times;</a>`
                 }
                 tempHtml += `</div>`
                 $('#article-comment-div').append(tempHtml)
@@ -880,6 +761,9 @@ function postComment(articleId) {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
+              
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)+1);
                 console.log("posting comment success")
             },
             error: function (response) {
@@ -890,13 +774,15 @@ function postComment(articleId) {
 }
 
 // 댓글 삭제
-function deleteComment(commentId) {
+function deleteComment(commentId, articleId) {
     if (confirm("댓글을 삭제하시겠습니까?")) {
         $.ajax({
             type: "DELETE",
             url: `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
             success: function () {
                 $(`#comment-box-${commentId}`).remove();
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)-1);
             },
             error: function (response) {
                 processError(response);

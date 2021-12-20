@@ -4,6 +4,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="shortcut icon" href="/images/favicon.png">
 
     <!-- Bootstrap CSS -->
@@ -46,25 +47,11 @@
         $('#list').load("list.html");
         $('#modal').load("article-modal.html");
 
-        // 프로필 이미지 클릭 시 업로드 창 띄우기
-        $(function() {
-            $('#user-profile-image').click(function () {
-                $("input[name='imageFile']").click();
-            })
-
-            $('#imageFile').on('change', function (e) {
-                e.preventDefault();
-                var newProfileImage = e.target.files[0];
-
-                updateUserProfileImage(newProfileImage);
-            })
-        })
 
         checkLoginStatus();
-        showMyPageSettings()
-        showNavbarProfileImage(gUserId);
+        showMyPageSettings();
         showUserProfileInfo(gProfileUserId)
-        showUserArticles(gProfileUserId)
+        showUserArticles(gProfileUserId, false)
     })
 
     // 프로필 이미지 클릭 시 업로드 창 띄우기
@@ -157,10 +144,10 @@
 <div class="profile-content-nav justify-content-center">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" id="articles-division" onclick="showUserArticles(`${gUserId}`)" href="#">Articles</a>
+            <a class="nav-link" id="articles-division" onclick="showUserArticles(`${gProfileUserId}`, false)" href="#">Articles</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="bookmarks-division" onclick="showUserBookmarks(`${gUserId}`)"  href="#">Bookmarks</a>
+            <a class="nav-link" id="bookmarks-division" onclick="showUserBookmarks(`${gProfileUserId}`, false)"  href="#bookmarks">Bookmarks</a>
         </li>
     </ul>
 </div>
