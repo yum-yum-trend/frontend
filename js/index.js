@@ -282,7 +282,7 @@ function makeArticles(articles) {
                                     <div class="card-body-content">
                                         <div class="card-body-left">
                                             <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
-                                            <p class="card-title">${article.user.username}<br>💬 ${article['comments'].length}</p>
+                                            <p class="card-title">${article.user.username}<br>💬 <span id="comment-counter-article-${article.id}">${article['comments'].length}</span></p>
                                         </div>
                                         <div class="card-body-right">
                                             <span id="card-like-${article.id}"></span>
@@ -306,6 +306,7 @@ function articleTimeCounter(createdAt) {
     let now = new Date();
     let ago = now.getTime() - Date.parse(createdAt)
     ago = Math.ceil(ago / 1000 / 60)
+    ago -= 60*9
 
     if (ago < 60) {
         return `${ago} 분 전`
@@ -656,7 +657,7 @@ function showArticleComments(articleId) {
                                     </div>`
 
                 if (gUserId === `${response[i].userId}`) {
-                    tempHtml += `<a onclick="deleteComment(${response[i].commentId})" aria-hidden="true" class="for-cursor x">&times;</a>`
+                    tempHtml += `<a onclick="deleteComment(${response[i].commentId}, ${articleId})" aria-hidden="true" class="for-cursor x">&times;</a>`
                 }
                 tempHtml += `</div>`
                 $('#article-comment-div').append(tempHtml)
@@ -689,6 +690,10 @@ function postComment(articleId) {
                 $('#article-comment-div').empty();
                 showArticleComments(articleId);
                 $('#article-comment-input-box').val('');
+              
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)+1);
+                console.log("posting comment success")
             },
             error: function (response) {
                 processError(response);
@@ -698,13 +703,15 @@ function postComment(articleId) {
 }
 
 // 댓글 삭제
-function deleteComment(commentId) {
+function deleteComment(commentId, articleId) {
     if (confirm("댓글을 삭제하시겠습니까?")) {
         $.ajax({
             type: "DELETE",
             url: `${WEB_SERVER_DOMAIN}/comment/${commentId}`,
             success: function () {
                 $(`#comment-box-${commentId}`).remove();
+                let counter = $(`#comment-counter-article-${articleId}`).text();
+                $(`#comment-counter-article-${articleId}`).text(Number(counter)-1);
             },
             error: function (response) {
                 processError(response);
