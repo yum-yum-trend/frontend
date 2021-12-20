@@ -10,8 +10,8 @@ function trendShow() {
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/trend`,
         success: function (response) {
-            console.log(response)
             locationChart();
+            tagChart();
             var attr = {
                 fill: "#fff",
                 stroke: "#666",
@@ -80,86 +80,120 @@ function trendShow() {
                                 location.href = "#seoul";
                                 current = state;
                                 locationChart("서울");
+                                tagChart("서울");
+                                TrendLocationArticle("서울");
                                 break;
                             case "gygg":
                                 location.href = "#gygg";
                                 current = state;
                                 locationChart("경기");
+                                tagChart("경기");
+                                TrendLocationArticle("경기");
                                 break;
                             case "incheon":
                                 location.href = "#incheon";
                                 current = state;
                                 locationChart("인천");
+                                tagChart("인천");
+                                TrendLocationArticle("인천");
                                 break;
                             case "gangwon":
                                 location.href = "#gangwon";
                                 current = state;
                                 locationChart("강원");
+                                tagChart("강원");
+                                TrendLocationArticle("강원");
                                 break;
                             case "chungbuk":
                                 location.href = "#chungbuk";
                                 current = state;
                                 locationChart("충북");
+                                tagChart("충북");
+                                TrendLocationArticle("충북");
                                 break;
                             case "chungnam":
                                 location.href = "#chungnam";
                                 current = state;
                                 locationChart("충남");
+                                tagChart("충남");
+                                TrendLocationArticle("충남");
                                 break;
                             case "daejeon":
                                 location.href = "#daejeon";
                                 current = state;
                                 locationChart("대전");
+                                tagChart("대전");
+                                TrendLocationArticle("대전");
                                 break;
                             case "sejong":
                                 location.href = "#sejong";
                                 current = state;
                                 locationChart("세종");
+                                tagChart("세종");
+                                TrendLocationArticle("세종");
                                 break;
                             case "jeonbuk":
                                 location.href = "#jeonbuk";
                                 current = state;
                                 locationChart("전북");
+                                tagChart("전북");
+                                TrendLocationArticle("전북");
                                 break;
                             case "gwangju":
                                 location.href = "#gwangju";
                                 current = state;
                                 locationChart("광주");
+                                tagChart("광주");
+                                TrendLocationArticle("광주");
                                 break;
                             case "jeonnam":
                                 location.href = "#jeonnam";
                                 current = state;
                                 locationChart("전남");
+                                tagChart("전남");
+                                TrendLocationArticle("전남");
                                 break;
                             case "gyeongbuk":
                                 location.href = "#gyeongbuk";
                                 current = state;
                                 locationChart("경북");
+                                tagChart("경북");
+                                TrendLocationArticle("경북");
                                 break;
                             case "daegu":
                                 location.href = "#daegu";
                                 current = state;
                                 locationChart("대구");
+                                tagChart("대구");
+                                TrendLocationArticle("대구");
                                 break;
                             case "gyeongnam":
                                 location.href = "#gyeongnam";
                                 current = state;
                                 locationChart("경남");
+                                tagChart("경남");
+                                TrendLocationArticle("경남");
                                 break;
                             case "ulsan":
                                 location.href = "#ulsan";
                                 current = state;
                                 locationChart("울산");
+                                tagChart("울산");
+                                TrendLocationArticle("울산");
                                 break;
                             case "busan":
                                 location.href = "#busan";
                                 current = state;
                                 locationChart("부산");
+                                tagChart("부산");
+                                TrendLocationArticle("부산");
                                 break;
                             case "jeju":
                                 location.href = "#jeju";
                                 current = state;
                                 locationChart("제주");
+                                tagChart("제주");
+                                TrendLocationArticle("제주");
                                 break;
 
                             default:
@@ -221,8 +255,10 @@ function addTrendShow(st, state, trendMapResponse) {
 }
 
 function locationChart(locationName) {
+    $("#location-trend").empty();
+    $("#location-trend").append((locationName === undefined) ? "전국 음식 트랜드" : locationName + " 음식 트랜드")
     $("canvas#myChart").remove();
-    $("div.myChart").append('<canvas id="myChart" width="250" height="250"></canvas>');
+    $("#mychart-category").append('<canvas id="myChart" width="250vw" height="250vh" style="display: block"></canvas>');
     $.ajax({
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/trend/chart?location=${(locationName === undefined) ? '' : locationName}`,
@@ -239,15 +275,14 @@ function locationChart(locationName) {
                 // a must be equal to b
                 return 0;
             });
-            console.log(response);
             <!--FixMe 보여주는 데이터 전처리하는 부분에 대해 의논해볼 것(하드코딩으로 처리되어있습니다...) -->
-            if (response.length<DATA_SHOW_CNT) {
-                for(let i = 0; i < response.length; i++) {
+            if (response.length < DATA_SHOW_CNT) {
+                for (let i = 0; i < response.length; i++) {
                     dataInfo.push(response[i].numberOfOrderByCategoryName)
                     labelInfo.push(response[i].categoryName);
                 }
             } else {
-                for(let i = 0; i < DATA_SHOW_CNT; i++) {
+                for (let i = 0; i < DATA_SHOW_CNT; i++) {
                     dataInfo.push(response[i].numberOfOrderByCategoryName)
                     labelInfo.push(response[i].categoryName);
                 }
@@ -266,8 +301,7 @@ function locationChart(locationName) {
                         'rgb(54, 162, 235)',
                         'rgb(255, 205, 86)',
                         'rgb(70, 80, 90)',
-                        'rgb(0, 204, 90)',
-                        'rgb(153, 0, 76)',
+                        'rgb(0, 204, 90)'
                     ],
                     hoverOffset: 5
                 }]
@@ -280,7 +314,8 @@ function locationChart(locationName) {
                 options: {
                     plugins: {
                         legend: {
-                            display: false,
+                            position: 'left',
+                            display: true,
                             labels: {
                                 color: 'rgb(255, 99, 132)'
                             }
@@ -288,7 +323,7 @@ function locationChart(locationName) {
                         title: {
                             display: true,
                             font: {weight: 'bold'},
-                            text: `${locationName == undefined ? "전국 맛집 분포도" : locationName + "지역 맛집 분포도"}`,
+                            text: `카테고리 순위`,
                             padding: {
                                 top: 10,
                                 bottom: 30
@@ -299,6 +334,114 @@ function locationChart(locationName) {
                     scales: {}
                 }
             });
+
+            $("#myChart").click(
+                function (evt) {
+                    var points = myChart.getElementsAtEventForMode(evt, 'nearest', {intersect: true}, true);
+                    console.log(points)
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        var label = myChart.data.labels[firstPoint.index];
+                        var value = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
+                        TrendCategoryArticle(label)
+                    }
+                });
+        }
+    })
+}
+
+function tagChart(locationName) {
+    $("canvas#myChart2").remove();
+    $("#mychart-tag").append('<canvas id="myChart2" width="230vw" height="250vh" style="display: block"></canvas>');
+    $.ajax({
+        type: 'GET',
+        url: `${WEB_SERVER_DOMAIN}/trend/chart/tag?location=${(locationName === undefined) ? '' : locationName}`,
+        success: function (response) {
+            console.log(response)
+            let dataInfo = [];
+            let labelInfo = [];
+            response.sort(function (a, b) {
+                if (a.numberOfOrderByCategoryName < b.numberOfOrderByCategoryName) {
+                    return 1;
+                }
+                if (a.numberOfOrderByCategoryName > b.numberOfOrderByCategoryName) {
+                    return -1;
+                }
+                // a must be equal to b
+                return 0;
+            });
+            <!--FixMe 보여주는 데이터 전처리하는 부분에 대해 의논해볼 것(하드코딩으로 처리되어있습니다...) -->
+            if (response.length < DATA_SHOW_CNT) {
+                for (let i = 0; i < response.length; i++) {
+                    dataInfo.push(response[i].numberOfOrderByCategoryName)
+                    labelInfo.push(response[i].categoryName);
+                }
+            } else {
+                for (let i = 0; i < DATA_SHOW_CNT; i++) {
+                    dataInfo.push(response[i].numberOfOrderByCategoryName)
+                    labelInfo.push(response[i].categoryName);
+                }
+            }
+            if (dataInfo.length == 0) {
+                dataInfo = [1];
+                labelInfo = ["유효한 데이터가 존재하지 않습니다."];
+            }
+            const data = {
+                labels: labelInfo,
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: dataInfo,
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)',
+                        'rgb(70, 80, 90)',
+                        'rgb(0, 204, 90)'
+                    ],
+                    hoverOffset: 5
+                }]
+            };
+
+            const ctx = document.getElementById('myChart2').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data,
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'left',
+                            display: true,
+                            labels: {
+                                color: 'rgb(255, 99, 132)'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            font: {weight: 'bold'},
+                            text: "태그 순위",
+                            padding: {
+                                top: 10,
+                                bottom: 30
+                            },
+                        }
+                    },
+                    responsive: false,
+                    scales: {}
+                }
+            });
+
+            $("#myChart2").click(
+                function (evt) {
+                    var points = myChart.getElementsAtEventForMode(evt, 'nearest', {intersect: true}, true);
+
+                    if (points.length) {
+                        const firstPoint = points[0];
+                        var label = myChart.data.labels[firstPoint.index];
+                        var value = myChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
+                        TrendTagArticle(label)
+                    }
+                });
         }
     })
 }
