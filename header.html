@@ -12,11 +12,11 @@
                     <div class="col-1">
                         <a class="nav-item nav-link" href="#">위치</a>
                     </div>
-                    <div class="col-4">
-                        <input class="form-control mr-sm-2" id="search-tag" type="text" placeholder="태그" aria-label="태그" aria-describedby="basic-addon2" value="">
+                    <div class="col-4 ui-widget">
+                        <input class="form-control mr-sm-2" id="search-tag" type="text" placeholder="태그" aria-label="태그" aria-describedby="basic-addon2">
                     </div>
                     <div class="col-2">
-                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="searchArticle()">검색</button>
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="">검색</button>
                     </div>
                 </div>
             </div>
@@ -32,5 +32,10 @@
         </div>
     </div>
 </nav>
-<script>showNavbarProfileImage(gUserId)</script>
+<script>
+    showNavbarProfileImage(gUserId);
+    $(function() {
+        $("#search-tag").on("click", getSearchSource);
+    })
+</script>
 
