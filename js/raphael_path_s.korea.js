@@ -258,7 +258,7 @@ function locationChart(locationName) {
     $("#location-trend").empty();
     $("#location-trend").append((locationName === undefined) ? "전국 음식 트랜드" : locationName + " 음식 트랜드")
     $("canvas#myChart").remove();
-    $("#mychart-category").append('<canvas id="myChart" width="250vw" height="250vh" style="display: block"></canvas>');
+    $("#mychart-category").append('<canvas id="myChart" width="325vw" height="250vh" style="display: block"></canvas>');
     $.ajax({
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/trend/chart?location=${(locationName === undefined) ? '' : locationName}`,
@@ -353,7 +353,7 @@ function locationChart(locationName) {
 
 function tagChart(locationName) {
     $("canvas#myChart2").remove();
-    $("#mychart-tag").append('<canvas id="myChart2" width="230vw" height="250vh" style="display: block"></canvas>');
+    $("#mychart-tag").append('<canvas id="myChart2" width="325vw" height="250vh" style="display: block"></canvas>');
     $.ajax({
         type: 'GET',
         url: `${WEB_SERVER_DOMAIN}/trend/chart/tag?location=${(locationName === undefined) ? '' : locationName}`,
