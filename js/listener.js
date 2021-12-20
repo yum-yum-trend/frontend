@@ -8,6 +8,12 @@ function registerEventListener() {
     $('#article-images').on('change', function (e) {
         articleImageInput(e);
     });
+
+    // modal hide 리스너
+    $('#article-modal').on('hidden.bs.modal', modalHiddenListener);
+
+    // modal show 리스너
+    $('#article-modal').on('show.bs.modal', modalShowListener);
 }
 
 function articleTagInput() {
@@ -75,28 +81,31 @@ function articleImageInput(e) {
         };
         reader.readAsDataURL(file);
     });
+
+    initArticleImageController();
 }
 
-// modal hide 리스너
-$('#article-modal').on('hidden.bs.modal', function (e) {
+function modalHiddenListener() {
+    console.log("here?");
     // 이전에 입력되었던 내용 삭제
     tagNames = [];
     rmImageIds = [];
     imageFileDict = {};
     imageFileDictKey = 0;
+    totalImageFileCnt = 0;
     deleteSelectLocation();
+    initArticleImageController();
 
     $('#article-images').val('');
     $('#article-textarea').val('');
     $('.modal-dynamic-contents').empty();
 
     articleStatus = "-list";
-})
+}
 
-// modal show 리스너
-$('#article-modal').on('show.bs.modal', function (e) {
+function modalShowListener() {
     articleStatus = "-modal";
-})
+}
 
 window.addEventListener("scroll", function () {
     const SCROLLED_HEIGHT = window.scrollY;

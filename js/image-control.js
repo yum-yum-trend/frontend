@@ -21,7 +21,6 @@ function next(){
     if(totalImageFileCnt <= 1) return;
 
     if(totalImageFileCnt > 0 && curPos < totalImageFileCnt){
-        console.log(images);
         prevBtn.removeAttr("disabled");
         postion -= IMAGE_WIDTH;
         images.css("transform", `translateX(${postion}px)`);
@@ -45,4 +44,11 @@ function initArticleImageController(){
     prevBtn.attr('disabled', 'true');
     prevBtn.unbind('click').on("click", prev)
     nextBtn.unbind('click').on("click", next)
+
+    if(totalImageFileCnt > 1) {
+        nextBtn.removeAttr("disabled")
+    }
+    else {
+        nextBtn.attr('disabled', 'true');
+    }
 }
