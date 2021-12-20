@@ -9,6 +9,10 @@ let rmImageIds = [];
 let currentPage = 0;
 let isApiCalling = false;
 let lastPage = false;
+let showSearch = "";
+let showLocation = "";
+let showCategory = "";
+let showTagName = "";
 
 let gArticle;
 
@@ -237,7 +241,8 @@ function addArticle() {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles(1);
+            $('#article-list').empty();
+            showArticles();
         },
         error: function (response) {
             processError(response);
@@ -245,23 +250,88 @@ function addArticle() {
     })
 }
 
+function reloadChart() {
+    showLocation = "";
+    showCategory = "";
+    showTagName = "";
+    currentPage = 0;
+    $('#article-list').empty();
+    locationChart();
+    tagChart();
+    showArticles();
+}
+
+function searchArticle() {
+    showLocation = "";
+    showCategory = "";
+    $(".trend").hide();
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
+}
+
+function TrendLocationArticle(location) {
+    showLocation = location;
+    showCategory = "";
+    showTagName = "";
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles();
+}
+
+function TrendCategoryArticle(category) {
+    showCategory = category;
+    showTagName = "";
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
+}
+
+function TrendTagArticle(tag) {
+    showCategory = "";
+    showTagName = tag;
+    currentPage = 0;
+    $('#article-list').empty();
+    showArticles()
+}
+
 /* 모든 게시물 조회 */
-function showArticles(search) {
-    // 검색버튼에만 search변수를 넣어줬습니다.(임의의 숫자 1)
-    if(search) {
-        currentPage = 0;
-        $('#article-list').empty();
-    }
+function showArticles() {
+    console.log("showSearch"+showSearch)
+    console.log("showLocation"+showLocation)
+    let urlSource = "";
+
+    console.log("current page = " + currentPage);
 
     isApiCalling = true;
     let sorting = "createdAt";
     let isAsc = false;
     let tag = $("#search-tag").val();
 
+    if (showLocation) {
+        if (showCategory) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=${showCategory}&tagName=`
+        } else if (showTagName) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=&tagName=${showTagName}`
+        } else {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=${showLocation}&category=&tagName=`
+        }
+    } else {
+        if (showCategory) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=${showCategory}&tagName=`
+        } else if (showTagName) {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=&tagName=${showTagName}`
+        } else {
+            urlSource = `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}&location=&category=&tagName=`
+        }
+
+    }
+
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles?searchTag=${(tag === undefined) ? '' : tag}&sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
+        url: urlSource,
         success: function (response) {
+            console.log(response)
             makeArticles(response)
             showLikes()
         },
@@ -564,7 +634,8 @@ function updateArticle(id) {
             loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
-            showArticles(1);
+            $('#article-list').empty();
+            showArticles();
         },
         error: function (response) {
             processError(response);

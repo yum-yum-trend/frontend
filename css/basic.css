@@ -326,3 +326,13 @@
     display: flex;
     flex-direction: row;
 }
+
+.reload-button {
+    height: 40px;
+    border-radius: 10px;
+}
+
+.reload-button:hover {
+    height: 42px;
+    border-radius: 10px;
+}
