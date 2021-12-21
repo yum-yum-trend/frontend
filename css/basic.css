@@ -44,6 +44,16 @@
     cursor: pointer;
 }
 
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+* html .ui-autocomplete {
+    height: 200px;
+}
+
 #nav-user-profile-image {
     border: 1px solid lightgray;
     border-radius: 50%;

@@ -109,3 +109,40 @@ window.addEventListener("scroll", function () {
         showArticles();
     }
 });
+
+
+let searchSource = [];
+// 태그 검색 리스너
+function searchEventListener() {
+    $("#search-tag").autocomplete({
+        source : searchSource,
+        select : function(event, ui) {
+            $("#search-tag").val(ui.item.value);
+            searchArticle();
+        },
+        focus : function(event, ui) {
+            return false;
+        },
+        minLength: 1,
+        autoFocus: true,
+        classes: {
+            "ui-autocomplete": "highlight"
+        },
+        delay: 500,
+        position: { my : "right top", at: "right bottom" }
+    });
+}
+
+function getSearchSource() {
+    if (!searchSource.length) {
+        $.ajax({
+            type: 'GET',
+            url: `${WEB_SERVER_DOMAIN}/search`,
+            success: function (data) {
+                searchSource = data
+                searchEventListener();
+            }
+        });
+    }
+
+}
