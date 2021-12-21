@@ -37,6 +37,9 @@
             integrity="sha512-CWVDkca3f3uAWgDNVzW+W4XJbiC3CH84P2aWZXj+DqI6PNbTzXbl1dIzEHeNJpYSn4B6U8miSZb/hCws7FnUZA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.css"/>
 
     <!-- Google Font -->
@@ -47,13 +50,14 @@
     <!-- Custom JS / CSS -->
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <link href="/css/koreaMap.css" rel="stylesheet" type="text/css">
-    <script src="/secret/secrets.js"></script>
-    <script src="/js/basic.js"></script>
-    <script src="/js/index.js"></script>
-    <script src="/js/location.js"></script>
-    <script src="/js/trend.js"></script>
+    <script type="text/javascript" src="/secret/secrets.js"></script>
+    <script type="text/javascript" src="/js/basic.js"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
+    <script type="text/javascript" src="/js/location.js"></script>
+    <script type="text/javascript" src="/js/listener.js"></script>
     <script type="text/javascript" src="/js/raphael_min.js"></script>
     <script type="text/javascript" src="/js/raphael_path_s.korea.js"></script>
+    <script type="text/javascript" src="/js/image-control.js"></script>
 
     <title>Yum Yum Trend</title>
 </head>
@@ -67,17 +71,17 @@
         $('#list').load("list.html");
         $('#modal').load("article-modal.html");
 
-        // showNavbarProfileImage(gUserId);
         showArticles();
     });
-
 
 </script>
 <body>
 <header id="header"></header>
-<container>
-    <div class="list-wrap" style="display: flex;">
-        <div style="width:60%;height:400px;justify-content: center; display: flex;">
+<container class="trend">
+    <h2 id="location-trend" style="text-align: center; margin-top: 30px;"></h2>
+    <div class="list-wrap row justify-content-md-center card-deck" style="margin-top: 10px;">
+        <div class="col-3" style="width:100%;height:400px;justify-content: center;">
+            <button onclick="reloadChart()" class="reload-button"><i class="fas fa-redo-alt"></i> 전 지역</button>
             <div id="canvas">
                 <div id="south"></div>
                 <div id="seoul"><h2>서울특별시</h2></div>
@@ -99,10 +103,14 @@
                 <div id="jeju"><h2>제주특별자치도</h2></div>
             </div>
         </div>
-        <div class="myChart" style="width: 250px; height: 250px; justify-content: center;">
-            <canvas id="myChart" width="250" height="250"></canvas>
+        <div id="mychart-category" class="myChart col-3" style="width: 250px; height: 250px; justify-content: center;">
+            <canvas id="myChart" width="250vw" height="250vh"></canvas>
+        </div>
+        <div id="mychart-tag" class="myChart col-3" style="width: 230px; height: 250px; justify-content: center;">
+            <canvas id="myChart2" width="230vw" height="250vh"></canvas>
         </div>
     </div>
+    <hr style="width: 1300px;" />
 </container>
 <section id="list"></section>
 <section id="modal"></section>

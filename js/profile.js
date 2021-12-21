@@ -3,7 +3,7 @@ const gProfileUserId = new RegExp('[\?]' + 'userId' + '=([^#]*)').exec(window.lo
 const gIsMyPage = (gUserId === gProfileUserId);
 
 
-// set JWT token in http request header
+<!-- set JWT token in http request header -->
 $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
     if(localStorage.getItem('access_token')) {
         jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
@@ -151,7 +151,6 @@ function updateUserProfileInfo(userId) {
         },
         error: function (response) {
             if (response.status === 401) {
-                console.log(response)
                 alert("현재 사용중인 비밀번호를 정확히 입력해주세요.")
             } else {
                 processError(response)
@@ -192,12 +191,16 @@ function saveUserProfileIntroText(userId) {
 
 
 // 자신이 작성한 글 보기
-function showUserArticles(userId) {
+function showUserArticles(userId, scroll) {
     isApiCalling = true;
     let sorting = "createdAt";
     let isAsc = false;
 
-    $("#article-list").empty();
+    if (!scroll) {
+        $("#article-list").empty();
+        currentPage = 0;
+    }
+
     $("#articles-division").addClass("active");
     $("#bookmarks-division").removeClass("active");
 
@@ -229,19 +232,32 @@ function showUserLikes(userId) {
     })
 }
 
-// 자신이 저장한 글 보기
-function showUserBookmarks(userId) {
-    currentPage = 0;
-    $("#article-list").empty();
+// 자신이 좋아요한 글 보기
+function showUserBookmarks(userId, scroll) {
+    isApiCalling = true;
+    let sorting = "createdAt";
+    let isAsc = false;
+
+    if (!scroll) {
+        $("#article-list").empty();
+        currentPage = 0;
+    }
+
     $("#articles-division").removeClass("active");
     $("#bookmarks-division").addClass("active");
 
     $.ajax({
         type : "GET",
-        url : `${WEB_SERVER_DOMAIN}/profile/bookmarks/${userId}`,
+        url : `${WEB_SERVER_DOMAIN}/profile/bookmarks/${userId}?sortBy=${sorting}&isAsc=${isAsc}&currentPage=${currentPage}`,
         data : {},
         success : function (response) {
-            makeArticles(response);
+            response[0]['content'] = response[1]
+            makeArticles(response[0]);
+            // showUserLikes(userId)
+            showLikes()
+        },
+        error: function (response) {
+            processError(response);
         }
     })
 }
