@@ -25,6 +25,9 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,11 +36,13 @@
     <!-- Custom JS / CSS -->
     <link href="/css/basic.css" rel="stylesheet" type="text/css">
     <link href="/css/profile.css" rel="stylesheet" type="text/css">
-    <script src="/js/basic.js"></script>
-    <script src="/js/index.js"></script>
-    <script src="/js/location.js"></script>
-    <script src="/js/profile.js"></script>
-    <script src="/secret/secrets.js"></script>
+    <script type="text/javascript" src="/secret/secrets.js"></script>
+    <script type="text/javascript" src="/js/basic.js"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
+    <script type="text/javascript" src="/js/profile.js"></script>
+    <script type="text/javascript" src="/js/location.js"></script>
+    <script type="text/javascript" src="/js/listener.js"></script>
+    <script type="text/javascript" src="/js/image-control.js"></script>
 
     <title>Yum Yum Trend</title>
 </head>
@@ -72,86 +77,86 @@
 <!-- Header -->
 <header id="header"></header>
 
-
-<!-- profile userinfo division -->
-<div class="profile-content">
-    <div class="profile-pic" id="profile-pic">
-    </div>
-    <div>
-        <div class="profile-info">
-            <div id="profile-username"></div>
-            <div id="profile-email"></div>
-            <div id="setting-button-div"></div>
+<div id="profile-content">
+    <!-- profile userinfo division -->
+    <div class="profile-content">
+        <div class="profile-pic" id="profile-pic">
         </div>
-        <div class="profile-introduction">
-            <div id="profile-text-onscreen">
-                <div id="profile-intro-text"></div>
-                <i class="fas fa-edit for-cursor" id="edit-icon" onclick="openProfileTextarea()"></i>
+        <div>
+            <div class="profile-info">
+                <div id="profile-username"></div>
+                <div id="profile-email"></div>
+                <div id="setting-button-div"></div>
             </div>
-            <div class="input-group mb-3" id="profile-introduction-textarea">
-                <input type="text" class="form-control" id="profile-text-to-change" placeholder="상태 메세지를 작성해보세요">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="profile-text-to-change-button" onclick="saveUserProfileIntroText(`${gUserId}`)">수정</button>
+            <div class="profile-introduction">
+                <div id="profile-text-onscreen">
+                    <div id="profile-intro-text"></div>
+                    <i class="fas fa-edit for-cursor" id="edit-icon" onclick="openProfileTextarea()"></i>
+                </div>
+                <div class="input-group mb-3" id="profile-introduction-textarea">
+                    <input type="text" class="form-control" id="profile-text-to-change" placeholder="상태 메세지를 작성해보세요">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="profile-text-to-change-button" onclick="saveUserProfileIntroText(`${gUserId}`)">수정</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<!-- profile info change modal division -->
-<div class="modal fade" id="profile-change-modal" tabindex="-1" role="dialog" aria-labelledby="profile-change-modal-label" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="profile-change-modal-label">설정</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>비밀번호 재설정</p>
-                <form>
-                    <div class="form-group" id="present-password-form">
-                        <label for="present-password" class="col-form-label">현재 비밀번호: </label>
-                        <input type="password" class="form-control" id="present-password">
-                    </div>
-                    <div class="form-group" id="password-to-change-form">
-                        <label for="password-to-change" class="col-form-label">비밀번호 변경: </label>
-                        <input type="password" class="form-control" id="password-to-change">
-                    </div>
-                    <div class="form-group" id="password-to-change-check-form">
-                        <label for="password-to-change-check" class="col-form-label">비밀번호 변경 재확인: </label>
-                        <input type="password" class="form-control" id="password-to-change-check">
-                    </div>
+    <!-- profile info change modal division -->
+    <div class="modal fade" id="profile-change-modal" tabindex="-1" role="dialog" aria-labelledby="profile-change-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profile-change-modal-label">설정</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>비밀번호 재설정</p>
+                    <form>
+                        <div class="form-group" id="present-password-form">
+                            <label for="present-password" class="col-form-label">현재 비밀번호: </label>
+                            <input type="password" class="form-control" id="present-password">
+                        </div>
+                        <div class="form-group" id="password-to-change-form">
+                            <label for="password-to-change" class="col-form-label">비밀번호 변경: </label>
+                            <input type="password" class="form-control" id="password-to-change">
+                        </div>
+                        <div class="form-group" id="password-to-change-check-form">
+                            <label for="password-to-change-check" class="col-form-label">비밀번호 변경 재확인: </label>
+                            <input type="password" class="form-control" id="password-to-change-check">
+                        </div>
 
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" onclick="resetProfileImage(`${gUserId}`)">프로필 사진 초기화</button>
-                <button type="button" class="btn btn-primary" onclick="updateUserProfileInfo(`${gUserId}`)">비밀번호 변경</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="resetProfileImage(`${gUserId}`)">프로필 사진 초기화</button>
+                    <button type="button" class="btn btn-primary" onclick="updateUserProfileInfo(`${gUserId}`)">비밀번호 변경</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
             </div>
         </div>
     </div>
+
+
+    <hr class="profile-hr">
+
+
+    <!-- profile content button division -->
+    <div class="profile-content-nav justify-content-center">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" id="articles-division" onclick="showUserArticles(`${gProfileUserId}`, false)" href="#">Articles</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="bookmarks-division" onclick="showUserBookmarks(`${gProfileUserId}`, false)"  href="#bookmarks">Bookmarks</a>
+            </li>
+        </ul>
+    </div>
 </div>
-
-
-<hr class="profile-hr">
-
-
-<!-- profile content button division -->
-<div class="profile-content-nav justify-content-center">
-    <ul class="nav">
-        <li class="nav-item">
-            <a class="nav-link" id="articles-division" onclick="showUserArticles(`${gProfileUserId}`, false)" href="#">Articles</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="bookmarks-division" onclick="showUserBookmarks(`${gProfileUserId}`, false)"  href="#bookmarks">Bookmarks</a>
-        </li>
-    </ul>
-</div>
-
 
 <!-- profile content division -->
 <section id="list"></section>

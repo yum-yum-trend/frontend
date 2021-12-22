@@ -265,6 +265,7 @@ function searchArticle() {
     showLocation = "";
     showCategory = "";
     $(".trend").hide();
+    $("#profile-content").hide();
     currentPage = 0;
     $('#article-list').empty();
     showArticles()
