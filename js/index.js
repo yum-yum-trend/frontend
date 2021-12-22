@@ -496,6 +496,9 @@ function replaceTextNewLine(text) {
 
 /* 모달 출력 내용 (게시물 조회 / 수정) */
 function makeArticleContents(action) {
+    totalImageFileCnt = gArticle.images.length;
+    initArticleImageController();
+
     $('.modal-dynamic-contents').empty();
 
     if (gArticle.user.userProfileImageUrl) {
