@@ -86,7 +86,6 @@ function articleImageInput(e) {
 }
 
 function modalHiddenListener() {
-    console.log("here?");
     // 이전에 입력되었던 내용 삭제
     tagNames = [];
     rmImageIds = [];
