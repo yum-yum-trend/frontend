@@ -2,10 +2,9 @@ const MAX_IMAGE_UPLOAD = 10;
 
 let articleStatus = "-list";
 let tagNames = [];
-let imageFileDict = {};
-let imageFileDictKey = 0;
+let uploadImageIds = [];
+let tmpImageId = 0;
 let totalImageFileCnt = 0;
-let rmImageIds = [];
 let currentPage = 0;
 let isApiCalling = false;
 let lastPage = false;
@@ -15,14 +14,6 @@ let showCategory = "";
 let showTagName = "";
 
 let gArticle;
-
-
-<!-- set JWT token in http request header -->
-$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
-    if(localStorage.getItem('access_token')) {
-        jqXHR.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
-    }
-});
 
 
 // 오른쪽 상단 프로필 사진&드롭다운 동적 생성
@@ -94,19 +85,6 @@ function logout() {
 /* 사용자 구별 */
 function isMe(userId) {
     return (localStorage.getItem("userId") == userId);
-}
-
-function loadingPageToggle(action, msg) {
-    switch (action) {
-        case "show":
-            $('#modal-load').show();
-            $('#modal-load-msg-div').append(`<div>${msg}</div>`);
-            break;
-        case "hide":
-            $('#modal-load-msg-div').empty();
-            $('#modal-load').hide();
-            break;
-    }
 }
 
 /* 게시물 추가/보기/수정 모달 내용 토글 */
@@ -196,13 +174,6 @@ function removeTag(span, rmTag) {
     span.remove();
 }
 
-function removeImageElement(key) {
-    delete imageFileDict[key];
-    $(`#image-${key}`).remove();
-    totalImageFileCnt--;
-    initArticleImageController();
-}
-
 function checkArticleImagesInput() {
     if (totalImageFileCnt == 0) {
         alert("최소 1개 이상의 이미지를 업로드해야합니다.");
@@ -212,36 +183,102 @@ function checkArticleImagesInput() {
     return true;
 }
 
-function addArticle() {
-    if (!checkArticleImagesInput()) return;
-
-    loadingPageToggle("show", "게시물을 등록 중입니다.");
-
+/* 이미지 업로드 */
+function uploadImage(imageFile, imageSrc) {
     let formData = new FormData();
-    let locationJsonString = JSON.stringify(gLocationInfo)
-    formData.append("text", $('#article-textarea').val());
-    formData.append("location", locationJsonString);
-    formData.append("tagNames", tagNames);
+    formData.append("imageFile", imageFile);
 
-    Object.keys(imageFileDict).forEach(function (key) {
-        formData.append("imageFiles", imageFileDict[key]);
-    });
+    let curImageId = tmpImageId++;
 
     $.ajax({
         type: 'POST',
-        url: `${WEB_SERVER_DOMAIN}/articles`,
+        url: `${WEB_SERVER_DOMAIN}/article/image`,
         enctype: 'multipart/form-data',
         cache: false,
         contentType: false,
         processData: false,
         data: formData,
+        beforeSend: function(xhr) {
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${curImageId}">
+                                <img class="article-image" onerror="this.src='/images/article_placeholder.png'" src="${imageSrc}" data-file=${imageFile.name} />
+                                <div id="image-${curImageId}-loading-div" class="modal-load">
+                                    <div class="modal-load-img-div">
+                                        <img src="/images/loading-icon.gif" alt="로딩 이미지" width="16" height="6"/>
+                                    </div>
+                                    <div class="modal-load-msg-div">
+                                        이미지 업로드 중 입니다.
+                                    </div>
+                                </div>
+                           </div>`
+            $('#article-image-list').append(tmpHtml);
+        },
+        success: function (image) {
+            console.log("success");
+            uploadImageIds.push(image.id);
+
+            $(`#image-${curImageId}-loading-div`).remove();
+            $(`#image-${curImageId}`).attr('id', `image-${image.id}`);
+            $(`#image-${image.id}`).attr("onclick", `deleteImage(${image.id})`);
+
+            let tmpHtml = `<div class="article-image-container-middle">
+                                <div class="delete-text">삭제</div>
+                           </div>`
+            $(`#image-${image.id}`).append(tmpHtml);
+        }
+    });
+}
+
+/* 이미지 삭제 (업로드된 이미지 삭제) */
+function deleteImage(imageId) {
+    $.ajax({
+        type: 'DELETE',
+        url: `${WEB_SERVER_DOMAIN}/article/image/${imageId}`,
+        beforeSend: function(xhr) {
+            totalImageFileCnt--;
+
+            let idx = uploadImageIds.indexOf(imageId);
+            if (idx > -1) {
+                uploadImageIds.splice(idx, 1);
+            }
+
+            $(`#image-${imageId}`).remove();
+            initArticleImageController();
+        },
+        success: function (response) {
+
+        },
+        error: function (response) {
+            processError(response);
+        }
+    });
+}
+
+function addArticle() {
+    if (!checkArticleImagesInput()) return;
+    if (totalImageFileCnt != uploadImageIds.length) {
+        alert("이미지 업로드 중 입니다. 잠시만 기다려주세요.");
+        return;
+    }
+
+    let data = {
+        "text": $('#article-textarea').val(),
+        "location": JSON.stringify(gLocationInfo),
+        "tagNames": tagNames,
+        "imageIds": uploadImageIds
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: `${WEB_SERVER_DOMAIN}/articles`,
+        contentType: "application/json",
+        data: JSON.stringify(data),
         success: function (response) {
             alert("게시물이 성공적으로 등록됐습니다.");
 
-            loadingPageToggle("hide");
             $('#article-modal').modal('hide');
-
             $('#article-list').empty();
+
+            currentPage = 0;
             showArticles();
         },
         error: function (response) {
@@ -344,11 +381,10 @@ function showArticles() {
 
 function makeArticles(articles) {
     lastPage = articles.last;
-    // console.log(articles.content[0]['comments'].length) // articles 비어있으면 오류 발생
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
-                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" alt="Card image cap" width="100px">
+                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" onerror="this.src='/images/article_placeholder.png'" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
                                     <div class="card-body-content">
                                         <div class="card-body-left">
@@ -367,6 +403,7 @@ function makeArticles(articles) {
         $('#article-list').append(tmpHtml);
     })
     isApiCalling = false;
+    // TODO: 광훈님 HELP
     if(articles.totalPages != articles.number + 1) {
         currentPage += 1
     }
@@ -475,7 +512,7 @@ function deleteLike(articleId) {
 function getArticle(id) {
     $.ajax({
         type: 'GET',
-        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
+        url: `${WEB_SERVER_DOMAIN}/article/${id}`,
         success: function (response) {
             gArticle = response;
             articleModalToggle("get");
@@ -523,8 +560,8 @@ function makeArticleContents(action) {
 
         gArticle.images.forEach(function (image) {
             let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}">
-                            <img src="${image.url}" class=""/>
-                           </div>`
+                                <img class="article-image" src="${image.url}" onerror="this.src='/images/article_placeholder.png'"/>
+                            </div>`
             $('#article-image-list').append(tmpHtml);
         })
 
@@ -536,7 +573,7 @@ function makeArticleContents(action) {
         // 게시물 작성자와 사용자 구별
         if (isMe(gArticle.user.id)) {
             $('#article-delete-btn').show();
-            $('#article-delete-btn').attr("onclick", `deleteArticle(${gArticle.id})`)
+            $('#article-delete-btn').attr("onclick", `deleteAllImage(${gArticle.id}); deleteArticle(${gArticle.id});`)
             $('#article-update-btn').show();
             $('#article-update-btn').html('수정하기');
             $('#article-update-btn').attr("onclick", "$('#article-delete-btn').hide(); articleModalToggle('update'); makeArticleContents('update')");
@@ -572,10 +609,10 @@ function makeArticleContents(action) {
 
         totalImageFileCnt = gArticle.images.length;
         gArticle.images.forEach(function (image) {
-            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}" onclick="removeImage(${image.id}, this)">
-                                <img src="${image.url}" class=""/>
-                                 <div class="article-image-container-middle" >
-                                    <div class="text">삭제</div>
+            let tmpHtml = `<div class="article-image-container article-image" id="image-${image.id}" onclick="deleteImage(${image.id})">
+                                <img class="article-image" src="${image.url}" onerror="this.src='/images/article_placeholder.png'"/>
+                                <div class="article-image-container-middle">
+                                    <div class="delete-text">삭제</div>
                                 </div>
                            </div>`
             $('#article-image-list').append(tmpHtml);
@@ -593,49 +630,25 @@ function makeArticleContents(action) {
 }
 
 
-/* 이미지 삭제 (업로드된 이미지들 중) */
-function removeImage(id, img) {
-    rmImageIds.push(id);
-
-    totalImageFileCnt--;
-    img.remove();
-    initArticleImageController();
-}
-
-
 /* 게시물 수정 */
 function updateArticle(id) {
     if (!checkArticleImagesInput()) return;
 
-    loadingPageToggle("show", "게시물을 수정 중입니다.");
-
-    let formData = new FormData();
-    let locationJsonString = JSON.stringify(gLocationInfo)
-    formData.append("text", $('#article-textarea').val());
-    formData.append("location", locationJsonString);
-    formData.append("tagNames", tagNames);
-
-    Object.keys(imageFileDict).forEach(function (key) {
-        formData.append("imageFiles", imageFileDict[key]);
-    });
-
-    rmImageIds.forEach(function (id) {
-        formData.append("rmImageIds", id);
-    })
-
+    let data = {
+        "text": $('#article-textarea').val(),
+        "location": JSON.stringify(gLocationInfo),
+        "tagNames": tagNames,
+        "imageIds": uploadImageIds
+    }
 
     $.ajax({
         type: 'POST',
-        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
-        enctype: 'multipart/form-data',
-        cache: false,
-        contentType: false,
-        processData: false,
-        data: formData,
+        url: `${WEB_SERVER_DOMAIN}/article/${id}`,
+        contentType: "application/json",
+        data: JSON.stringify(data),
         success: function (response) {
             alert("게시물이 성공적으로 수정됐습니다.");
 
-            loadingPageToggle("hide");
             $('#article-modal').modal('hide');
 
             $('#article-list').empty();
@@ -650,18 +663,29 @@ function updateArticle(id) {
 
 /* 게시물 삭제 */
 function deleteArticle(id) {
-    loadingPageToggle("show", "게시물을 삭제 중입니다.");
-
     $.ajax({
         type: 'DELETE',
-        url: `${WEB_SERVER_DOMAIN}/articles/${id}`,
-        enctype: 'multipart/form-data',
+        url: `${WEB_SERVER_DOMAIN}/article/${id}`,
         success: function (response) {
             alert("게시물을 성공적으로 삭제했습니다.");
 
-            loadingPageToggle("hide");
             $('#article-modal').modal('hide');
+
             $(`#article-id-${id}`).remove();
+            trendShow();
+        },
+        error: function (response) {
+            processError(response);
+        }
+    })
+}
+
+function deleteAllImage(id) {
+    $.ajax({
+        type: 'DELETE',
+        url: `${WEB_SERVER_DOMAIN}/article/${id}/images`,
+        success: function (response) {
+            console.log("게시물 모든 이미지 삭제 완료");
         },
         error: function (response) {
             processError(response);

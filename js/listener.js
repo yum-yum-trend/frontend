@@ -51,7 +51,7 @@ function articleImageInput(e) {
     let filesArr = Array.prototype.slice.call(files);
 
     // 업로드 될 파일 총 개수 검사
-    totalImageFileCnt = Object.keys(imageFileDict).length + filesArr.length
+    totalImageFileCnt += filesArr.length
     if (totalImageFileCnt > MAX_IMAGE_UPLOAD) {
         alert("이미지는 최대 " + MAX_IMAGE_UPLOAD + "개까지 업로드 가능합니다.");
         totalImageFileCnt -= filesArr.length;
@@ -65,32 +65,22 @@ function articleImageInput(e) {
             return;
         }
 
-        // FIXME: <div> slider
         let reader = new FileReader();
-        reader.onload = function (e) {
-            imageFileDict[imageFileDictKey] = file;
-
-            let tmpHtml = `<div class="article-image-container article-image" id="image-${imageFileDictKey}">
-                                <img src="${e.target.result}" data-file=${file.name} 
-                                         />
-                                <div class="article-image-container-middle" onclick="removeImageElement(${imageFileDictKey++})">
-                                    <div class="text">삭제</div>
-                                </div>
-                           </div>`
-            $('#article-image-list').append(tmpHtml);
-        };
         reader.readAsDataURL(file);
+        reader.onload = function (e) {
+            uploadImage(file, e.target.result);
+        };
     });
 
+    e.target.value = '';
     initArticleImageController();
 }
 
 function modalHiddenListener() {
     // 이전에 입력되었던 내용 삭제
     tagNames = [];
-    rmImageIds = [];
-    imageFileDict = {};
-    imageFileDictKey = 0;
+    uploadImageIds = [];
+    tmpImageId = 0;
     totalImageFileCnt = 0;
     deleteSelectLocation();
     initArticleImageController();
