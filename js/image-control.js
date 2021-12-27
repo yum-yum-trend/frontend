@@ -1,5 +1,5 @@
 let curPos = 0;
-let postion = 0;
+let position = 0;
 const IMAGE_WIDTH = 420;
 let prevBtn = $("#image-prev-btn");
 let nextBtn = $("#image-next-btn");
@@ -8,8 +8,8 @@ let images = $("#article-image-list");
 function prev(){
     if(curPos > 0){
         nextBtn.removeAttr("disabled")
-        postion += IMAGE_WIDTH;
-        images.css("transform", `translateX(${postion}px)`);
+        position += IMAGE_WIDTH;
+        images.css("transform", `translateX(${position}px)`);
         curPos = curPos - 1;
     }
     if(curPos == 0){
@@ -22,8 +22,8 @@ function next(){
 
     if(totalImageFileCnt > 0 && curPos < totalImageFileCnt){
         prevBtn.removeAttr("disabled");
-        postion -= IMAGE_WIDTH;
-        images.css("transform", `translateX(${postion}px)`);
+        position -= IMAGE_WIDTH;
+        images.css("transform", `translateX(${position}px)`);
         curPos = curPos + 1;
     }
 
@@ -39,7 +39,7 @@ function initArticleImageController(){
     images.css("transform", `translateX(0px)`);
 
     curPos = 0;
-    postion = 0;
+    position = 0;
 
     prevBtn.attr('disabled', 'true');
     prevBtn.unbind('click').on("click", prev)
