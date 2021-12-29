@@ -369,7 +369,8 @@ function showArticles() {
         type: 'GET',
         url: urlSource,
         success: function (response) {
-            console.log(response)
+            console.log("articles");
+            console.log(response.content);
             makeArticles(response)
             showLikes()
         },
@@ -384,12 +385,12 @@ function makeArticles(articles) {
     articles.content.forEach(function (article) {
         let tmpHtml = ` <div id="article-id-${article.id}" class="col-3">
                             <div class="card" style="display: inline-block;">
-                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.images[0].url}" onerror="this.src='/images/article_placeholder.png'" alt="Card image cap" width="100px">
+                                <img onclick="getArticle(${article.id})" class="card-img-top" src="${article.articleImageUrl}" onerror="this.src='/images/article_placeholder.png'" alt="Card image cap" width="100px">
                                 <div id="card-body-${article.id}" class="card-body">
                                     <div class="card-body-content">
                                         <div class="card-body-left">
-                                            <img class="article-writter-profile-image for-cursor" src="${(article.user.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.user.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.user.id}'">
-                                            <p class="card-title">${article.user.username}<br>💬 <span id="comment-counter-article-${article.id}">${article['comments'].length}</span></p>
+                                            <img class="article-writter-profile-image for-cursor" src="${(article.userProfileImageUrl) == null ? "/images/profile_placeholder.png" : article.userProfileImageUrl}" alt="" onclick="location.href='profile.html?userId=${article.userId}'">
+                                            <p class="card-title">${article.username}<br>💬 <span id="comment-counter-article-${article.id}">${article.commentLength}</span></p>
                                         </div>
                                         <div class="card-body-right">
                                             <span id="card-like-${article.id}"></span>
@@ -403,7 +404,6 @@ function makeArticles(articles) {
         $('#article-list').append(tmpHtml);
     })
     isApiCalling = false;
-    // TODO: 광훈님 HELP
     if(articles.totalPages != articles.number + 1) {
         currentPage += 1
     }
@@ -672,7 +672,6 @@ function deleteArticle(id) {
             $('#article-modal').modal('hide');
 
             $(`#article-id-${id}`).remove();
-            trendShow();
         },
         error: function (response) {
             processError(response);
