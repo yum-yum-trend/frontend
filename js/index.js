@@ -672,7 +672,6 @@ function deleteArticle(id) {
             $('#article-modal').modal('hide');
 
             $(`#article-id-${id}`).remove();
-            trendShow();
         },
         error: function (response) {
             processError(response);
