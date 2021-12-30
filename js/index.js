@@ -538,14 +538,14 @@ function makeArticleContents(action) {
 
     $('.modal-dynamic-contents').empty();
 
-    if (gArticle.user.userProfileImageUrl) {
-        $("#article-user-profile-img").attr("src", gArticle.user.userProfileImageUrl);
+    if (gArticle.userProfileImageUrl) {
+        $("#article-user-profile-img").attr("src", gArticle.userProfileImageUrl);
     } else {
         $("#article-user-profile-img").attr("src", "/images/profile_placeholder.png");
     }
 
     if (action == "get") {
-        $('#article-username').text(gArticle.user.username);
+        $('#article-username').text(gArticle.username);
         $('#article-text-div').append(`${replaceTextNewLine(gArticle.text)}`);
 
         <!-- 위치 정보 표시 -->
@@ -571,9 +571,9 @@ function makeArticleContents(action) {
         })
 
         // 게시물 작성자와 사용자 구별
-        if (isMe(gArticle.user.id)) {
+        if (isMe(gArticle.userId)) {
             $('#article-delete-btn').show();
-            $('#article-delete-btn').attr("onclick", `deleteAllImage(${gArticle.id}); deleteArticle(${gArticle.id});`)
+            $('#article-delete-btn').attr("onclick", `deleteAllImage(${gArticle.articleId}); deleteArticle(${gArticle.articleId});`)
             $('#article-update-btn').show();
             $('#article-update-btn').html('수정하기');
             $('#article-update-btn').attr("onclick", "$('#article-delete-btn').hide(); articleModalToggle('update'); makeArticleContents('update')");
@@ -583,7 +583,7 @@ function makeArticleContents(action) {
             tagNames.push(tag.name);
         })
 
-        $('#article-username').text(gArticle.user.username);
+        $('#article-username').text(gArticle.username);
         $('#article-textarea').val(gArticle.text);
 
         <!-- 위치 정보 표시 -->
@@ -625,7 +625,7 @@ function makeArticleContents(action) {
         })
 
         $('#article-update-btn').html('게시하기');
-        $('#article-update-btn').attr("onclick", `updateArticle(${gArticle.id})`);
+        $('#article-update-btn').attr("onclick", `updateArticle(${gArticle.articleId})`);
     }
 }
 
