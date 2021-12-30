@@ -652,6 +652,7 @@ function updateArticle(id) {
             $('#article-modal').modal('hide');
 
             $('#article-list').empty();
+            currentPage = 0;
             showArticles();
         },
         error: function (response) {
